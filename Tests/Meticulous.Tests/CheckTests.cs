@@ -28,5 +28,14 @@ namespace Meticulous.Tests
             Check.ArgumentNotNull(arg, "arg");
         }
 
+        [TestCase(1, 0, 2)]
+        [TestCase(1, 1, 1)]
+        [TestCase(0, 1, 2, ExpectedException = typeof(ArgumentOutOfRangeException))]
+        [TestCase(0, 2, 2, ExpectedException = typeof(ArgumentOutOfRangeException))]
+        public void ArgumentInRange(int arg, int lo, int hi)
+        {
+            Check.ArgumentInRange(arg, "arg", lo, hi);
+        }
+
     }
 }

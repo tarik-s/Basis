@@ -9,11 +9,7 @@ namespace Meticulous
 {
     public static class Check
     {
-        #region Consts
-
-        //private static readonly string _invalidArgument = "Invalid argument";
-
-        #endregion
+        #region ArgumentNotNull
 
         public static void This<T>(T @this)
             where T : class
@@ -33,12 +29,34 @@ namespace Meticulous
             ArgumentNotNullImpl(arg, paramName, message);
         }
 
+        #endregion
+
+
+        #region ArgumentInRange
+
+        public static void ArgumentInRange<T>(T arg, string paramName, T lo, T hi, string message)
+            where T: struct, IComparable<T>
+        {
+            ArgumentInRangeImpl(arg, paramName, lo, hi, message);
+        }
+
+        public static void ArgumentInRange<T>(T arg, string paramName, T lo, T hi)
+            where T : struct, IComparable<T>
+        {
+            ArgumentInRangeImpl(arg, paramName, lo, hi, null);
+        }
+
+        #endregion
+
+        #region OperationValid
 
         public static void OperationValid(bool condition, string message)
         {
             if (!condition)
                 throw new InvalidOperationException(message);
         }
+
+        #endregion
 
         #region Impl
 
@@ -52,6 +70,21 @@ namespace Meticulous
                 throw new ArgumentNullException(paramName);
 
             throw new ArgumentNullException(paramName, message);
+        }
+
+        private static void ArgumentInRangeImpl<T>(T arg, string paramName, T lo, T hi, string message)
+            where T : struct, IComparable<T>
+        {
+            if (lo.CompareTo(arg) <= 0)
+            {
+                if (hi.CompareTo(arg) >= 0)
+                    return;
+            }
+
+            if (message == null)
+                throw new ArgumentOutOfRangeException(paramName);
+
+            throw new ArgumentOutOfRangeException(paramName, message);
         }
 
         #endregion

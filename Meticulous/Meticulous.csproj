@@ -43,6 +43,8 @@
     <Compile Include="EmptyArray.cs" />
     <Compile Include="ExceptionHandler.cs" />
     <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="IO\DirectoryContentsInfo.cs" />
+    <Compile Include="IO\ExtensionMethods.cs" />
     <Compile Include="Patterns\Builder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Threading\AtomicValue.cs" />
@@ -50,9 +52,7 @@
     <Compile Include="Threading\RunLoop.cs" />
     <Compile Include="TryFunc.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="IO\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
