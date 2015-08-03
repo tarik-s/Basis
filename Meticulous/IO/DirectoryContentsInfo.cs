@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Meticulous.Patterns;
 
@@ -27,10 +29,41 @@ namespace Meticulous.IO
         private readonly long _totalSizeOnDisk;
 
         #endregion
-
+        
         public static int DefaultPageSize
         {
             get { return 4 * 1024; }
+        }
+
+        public static DirectoryContentsInfo Create(DirectoryInfo directoryInfo)
+        {
+            Check.ArgumentNotNull(directoryInfo, "directoryInfo");
+
+            return CreateImpl(directoryInfo, CancellationToken.None, ExceptionHandler.NeverHandling);
+        }
+
+        public static DirectoryContentsInfo Create(DirectoryInfo directoryInfo, ExceptionHandler exceptionHandler)
+        {
+            Check.ArgumentNotNull(directoryInfo, "directoryInfo");
+            Check.ArgumentNotNull(exceptionHandler, "exceptionHandler");
+
+            return CreateImpl(directoryInfo, CancellationToken.None, exceptionHandler);
+        }
+
+        public static DirectoryContentsInfo Create(DirectoryInfo directoryInfo, CancellationToken cancellationToken)
+        {
+            Check.ArgumentNotNull(directoryInfo, "directoryInfo");
+
+            return CreateImpl(directoryInfo, cancellationToken, ExceptionHandler.NeverHandling);
+        }
+
+        public static DirectoryContentsInfo Create(DirectoryInfo directoryInfo, CancellationToken cancellationToken, 
+            ExceptionHandler exceptionHandler)
+        {
+            Check.ArgumentNotNull(directoryInfo, "directoryInfo");
+            Check.ArgumentNotNull(exceptionHandler, "exceptionHandler");
+
+            return CreateImpl(directoryInfo, cancellationToken, exceptionHandler);
         }
 
         internal DirectoryContentsInfo(DirectoryContentsInfoBuilder builder)
@@ -116,8 +149,83 @@ namespace Meticulous.IO
         }
 
         #endregion
-    }
 
+
+        private static DirectoryContentsInfo CreateImpl(DirectoryInfo directoryInfo, CancellationToken cancellationToken,
+            ExceptionHandler exceptionHandler)
+        {
+            var builder = new DirectoryContentsInfoBuilder();
+
+            var exceptionThrown = false;
+            try
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    foreach (var fileSystemInfo in directoryInfo.EnumerateFileSystemInfos())
+                    {
+                        ProcessFileSystemEntry(fileSystemInfo, builder, cancellationToken, exceptionHandler, ref exceptionThrown);
+
+                        if (cancellationToken.IsCancellationRequested)
+                            break;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                if (exceptionThrown)
+                    throw;
+
+                if (!exceptionHandler.HandleException(e))
+                {
+                    exceptionThrown = true;
+                    throw;
+                }
+            }
+
+            return builder.Build();
+        }
+
+        private static void ProcessFileSystemEntry(FileSystemInfo fileSystemInfo, DirectoryContentsInfoBuilder builder,
+            CancellationToken cancellationToken, ExceptionHandler exceptionHandler, ref bool exceptionThrown)
+        {
+            try
+            {
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+
+                var fi = fileSystemInfo as FileInfo;
+                if (fi != null)
+                {
+                    var size = fi.Length;
+                    builder.AddFile(size);
+                }
+                else
+                {
+                    var di = fileSystemInfo as DirectoryInfo;
+                    if (di != null)
+                    {
+                        builder.AddDirectory();
+                        foreach (var info in di.EnumerateFileSystemInfos())
+                        {
+                            ProcessFileSystemEntry(info, builder, cancellationToken, exceptionHandler, ref exceptionThrown);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                if (exceptionThrown)
+                    throw;
+
+                if (!exceptionHandler.HandleException(e))
+                {
+                    exceptionThrown = true;
+                    throw;
+                }
+            }
+        }
+
+    }
 
 
     public sealed class DirectoryContentsInfoBuilder : IBuilder<DirectoryContentsInfo>
@@ -231,7 +339,7 @@ namespace Meticulous.IO
 
             ++_directoryCount;
 
-            if (directorySize == 0) 
+            if (directorySize == 0)
                 return;
 
             _directorySize += directorySize;
