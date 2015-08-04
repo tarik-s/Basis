@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meticulous", "Meticulous\Meticulous.csproj", "{E0C3C44C-32CE-4701-9B57-FF3FFEAAC9E7}"
 EndProject
@@ -16,6 +16,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meticulous.Reporting", "Meticulous.Reporting\Meticulous.Reporting.csproj", "{7FA4D9AF-FA6C-479B-A262-AC462E005BA2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meticulous.Reporting.Tests", "Tests\Meticulous.Reporting.Tests\Meticulous.Reporting.Tests.csproj", "{D25FF36D-49B6-40D7-929A-03C7AD787967}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SandBoxes", "SandBoxes", "{13464BE6-18A5-482C-8F1F-493407E4E2EE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meticulous.SandBox", "SandBoxes\Meticulous.SandBox\Meticulous.SandBox.csproj", "{EF0952CF-BC4B-4BAA-BD8C-56212122484B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,13 +51,18 @@ Global
 		{D25FF36D-49B6-40D7-929A-03C7AD787967}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D25FF36D-49B6-40D7-929A-03C7AD787967}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D25FF36D-49B6-40D7-929A-03C7AD787967}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF0952CF-BC4B-4BAA-BD8C-56212122484B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF0952CF-BC4B-4BAA-BD8C-56212122484B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF0952CF-BC4B-4BAA-BD8C-56212122484B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF0952CF-BC4B-4BAA-BD8C-56212122484B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{7E676D37-B306-48D8-95DD-B87EFCCF0B21} = {0EFC0E97-1A38-45A7-8C3B-D6C78B589980}
 		{AD3D0E33-D08D-4842-8A18-B7EA75F21E67} = {0EFC0E97-1A38-45A7-8C3B-D6C78B589980}
+		{7E676D37-B306-48D8-95DD-B87EFCCF0B21} = {0EFC0E97-1A38-45A7-8C3B-D6C78B589980}
 		{D25FF36D-49B6-40D7-929A-03C7AD787967} = {0EFC0E97-1A38-45A7-8C3B-D6C78B589980}
+		{EF0952CF-BC4B-4BAA-BD8C-56212122484B} = {13464BE6-18A5-482C-8F1F-493407E4E2EE}
 	EndGlobalSection
 EndGlobal

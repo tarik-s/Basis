@@ -40,6 +40,11 @@ namespace Meticulous.Threading
             _processor = processorFactory(Execute);
         }
 
+        public static ExecutionQueue Create()
+        {
+            return Create(ExecutionQueueProcessorType.ThreadPool);
+        }
+
         public static ExecutionQueue Create(ExecutionQueueProcessorType type)
         {
             return new ExecutionQueue(action => ExecutionQueueProcessor.Create(type, action));
