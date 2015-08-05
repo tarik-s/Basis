@@ -64,16 +64,47 @@ namespace Meticulous.SandBox
         [RemoteField("ServerVersion")]
         private static readonly Remote<string> _serverVersion = default(string);
 
+        private enum Test
+        {
+            Val1,
+            Val2
+        }
 
+        private class A
+        {
+        }
 
         static int Main(string[] args)
         {
 
+            var infs = typeof (Test).GetInterfaces();
+
             var val = Atomic.Create(false);
 
-            var val2 = Atomic.Create(10);
+            var val2 = new Atomic<int>(10);
+            Console.WriteLine(val2.TrySet(10));
+            Console.WriteLine(val2.TrySet(1));
+            Console.WriteLine();
 
+            var val3 = new Atomic<string>("hello");
+            Console.WriteLine(val3.TrySet("hello"));
+            Console.WriteLine(val3.TrySet(null));
+            Console.WriteLine(val3.TrySet("hello"));
+            Console.WriteLine();
 
+            var val4 = new Atomic<Test>(Test.Val1);
+            Console.WriteLine(val4.TrySet(Test.Val1));
+            Console.WriteLine(val4.TrySet(Test.Val2));
+            Console.WriteLine(val4.TrySet(Test.Val1));
+            Console.WriteLine();
+
+            var a1 = new A();
+            var a2 = new A();
+            var val5 = new Atomic<A>(null);
+            Console.WriteLine(val5.TrySet(null));
+            Console.WriteLine(val5.TrySet(a1));
+            Console.WriteLine(val5.TrySet(a1));
+            Console.WriteLine(val5.TrySet(a2));
 
             Console.CancelKeyPress += (sender, eventArgs) =>
             {

@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Meticulous.Threading
 {
+    #region IAtomic interface
+
     public interface IAtomic<T>
     {
         T Value { get; set; }
@@ -18,12 +19,19 @@ namespace Meticulous.Threading
         T Exchange(T value);
     }
 
+    #endregion
+
+    
     public static class Atomic
     {
         public static IAtomic<T> Create<T>(T value)
         {
-            if (typeof (T) == typeof (bool))
+            var type = typeof (T);
+            if (type == typeof (bool))
                 return (IAtomic<T>)CreateImpl(typeof(AtomicBoolean), value);
+
+            if (type == typeof (int))
+                return (IAtomic<T>) CreateImpl(typeof (AtomicInteger), value);
 
             return (IAtomic<T>) CreateImpl(typeof (Atomic<T>), value);
         }
@@ -34,14 +42,23 @@ namespace Meticulous.Threading
             var ctor = type.GetConstructor(args);
             if (ctor == null)
                 throw new MissingMethodException(type.Name, ".ctor");
+
             return ctor.Invoke(new []{value});
         }
     }
+    
 
     public sealed class Atomic<T> : IAtomic<T>
     {
+        private static readonly IEqualityComparer<T> _equalizer;
+
         private readonly ReaderWriterLockSlim _lock;
         private T _value;
+
+        static Atomic()
+        {
+            _equalizer = EqualityComparer<T>.Default;
+        }
 
         public Atomic(T value)
         {
@@ -82,6 +99,9 @@ namespace Meticulous.Threading
             _lock.EnterWriteLock();
             try
             {
+                if (_equalizer.Equals(value, _value))
+                    return false;
+
                 _value = value;
                 return true;
             }
@@ -168,6 +188,68 @@ namespace Meticulous.Threading
     }
 
     #endregion
+
+    #region AtomicInteger
+
+    public struct AtomicIntegerValue : IAtomic<int>
+    {
+        private int _value;
+
+        public AtomicIntegerValue(int initialValue)
+        {
+            _value = initialValue;
+        }
+
+        public int Value
+        {
+            get { return Interlocked.CompareExchange(ref _value, 0, 0); }
+            set { Exchange(value); }
+        }
+
+        public int Exchange(int value)
+        {
+            return Interlocked.Exchange(ref _value, value);
+        }
+
+        public bool TrySet(int value)
+        {
+            var result = Exchange(value);
+            return result != value;
+        }
+    }
+
+    public sealed class AtomicInteger : IAtomic<int>
+    {
+        private AtomicIntegerValue _value;
+
+        public AtomicInteger()
+        {
+        }
+
+        public AtomicInteger(int initialValue)
+        {
+            _value.Exchange(initialValue);
+        }
+
+        public int Value
+        {
+            get { return _value.Value; }
+            set { _value.Exchange(value); }
+        }
+
+        public int Exchange(int value)
+        {
+            return _value.Exchange(value);
+        }
+
+        public bool TrySet(int value)
+        {
+            return _value.TrySet(value);
+        }
+    }
+
+    #endregion
+
 
     internal static class AtomicHelper
     {

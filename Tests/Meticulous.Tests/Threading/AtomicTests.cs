@@ -8,6 +8,13 @@ using NUnit.Framework;
 
 namespace Meticulous.Tests.Threading
 {
+    [TestFixture]
+    public class AtomicTest
+    {
+
+    }
+
+
 
     public abstract class AtomicBooleanTestsBase<T>
         where T : IAtomic<bool>
