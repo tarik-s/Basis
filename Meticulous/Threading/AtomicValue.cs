@@ -18,6 +18,77 @@ namespace Meticulous.Threading
         T Exchange(T value);
     }
 
+    public sealed class Atomic<T> : IAtomicValue<T>
+    {
+        private readonly ReaderWriterLockSlim _lock;
+        private T _value;
+
+        public Atomic(T value)
+        {
+            _value = value;
+            _lock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+        }
+
+        public T Value
+        {
+            get
+            {
+                _lock.EnterReadLock();
+                try
+                {
+                    return _value;
+                }
+                finally
+                {
+                    _lock.ExitReadLock();
+                }
+            }
+            set
+            {
+                _lock.EnterWriteLock();
+                try
+                {
+                    _value = value;
+                }
+                finally
+                {
+                    _lock.ExitWriteLock();
+                }
+            }
+        }
+
+        public bool TrySet(T value)
+        {
+            _lock.EnterWriteLock();
+            try
+            {
+                _value = value;
+                return true;
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+        }
+
+        public T Exchange(T value)
+        {
+            _lock.EnterWriteLock();
+            try
+            {
+                var oldValue = _value;
+                _value = value;
+                return oldValue;
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+        }
+    }
+
+    #region AtomicBoolean
+
     public struct AtomicBooleanValue : IAtomicValue<bool>
     {
         private int _value;
@@ -74,6 +145,8 @@ namespace Meticulous.Threading
             return _value.TrySet(value);
         }
     }
+
+    #endregion
 
     internal static class AtomicHelper
     {

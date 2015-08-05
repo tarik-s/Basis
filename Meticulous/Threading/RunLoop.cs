@@ -12,6 +12,8 @@ namespace Meticulous.Threading
         [ThreadStatic]
         private static RunLoop _currentLoop;
 
+        private static RunLoop _mainLoop;
+
         private readonly int _threadId;
 
         private readonly AutoResetEvent _signal;
@@ -19,6 +21,7 @@ namespace Meticulous.Threading
         private readonly ExecutionQueue _queue;
 
         private volatile bool _isStopped;
+        private int _exitCode;
 
         private RunLoop()
         {
@@ -32,15 +35,26 @@ namespace Meticulous.Threading
             get { return _currentLoop; }
         }
 
+        public static RunLoop MainLoop
+        {
+            get { return _mainLoop; }
+        }
+
         public int ThreadId
         {
             get { return _threadId; }
         }
 
-        public void Stop()
+        public void Stop(int exitCode)
         {
+            _exitCode = exitCode;
             _isStopped = true;
             _signal.Set();
+        }
+
+        public void Stop()
+        {
+            Stop(0);
         }
 
         public void Dispose()
@@ -48,12 +62,25 @@ namespace Meticulous.Threading
             _queue.Dispose();
         }
 
-        public static void Run()
+        public static int Run()
         {
-            Run(null);
+            return Run(null);
         }
 
-        public static void Run(Action initialAction)
+        public static int Run(Action initialAction)
+        {
+            return RunImpl(initialAction, false);
+        }
+
+        public static int Main(Action initialAction)
+        {
+            Check.OperationValid(_mainLoop == null, "Main loop is already started");
+            Check.OperationValid(_currentLoop == null, "Main loop cannot run within another loop");
+
+            return RunImpl(initialAction, true);
+        }
+
+        private static int RunImpl(Action initialAction, bool isMain)
         {
             var loop = new RunLoop();
             var oldCtx = SynchronizationContext.Current;
@@ -63,9 +90,11 @@ namespace Meticulous.Threading
             {
                 SynchronizationContext.SetSynchronizationContext(newCtx);
                 _currentLoop = loop;
+                if (isMain)
+                    _mainLoop = loop;
                 if (initialAction != null)
                     loop._queue.Post(initialAction);
-                loop.RunImpl();
+                return loop.RunImpl();
             }
             finally
             {
@@ -74,15 +103,16 @@ namespace Meticulous.Threading
             }
         }
 
-        private void RunImpl()
+        private int RunImpl()
         {
             while (_signal.WaitOne())
             {
                 if (_isStopped)
-                    return;
+                    break;
 
                 _processor.Pump();
             }
+            return _exitCode;
         }
 
 
