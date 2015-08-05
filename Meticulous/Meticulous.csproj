@@ -47,7 +47,7 @@
     <Compile Include="IO\ExtensionMethods.cs" />
     <Compile Include="Patterns\Builder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Threading\AtomicValue.cs" />
+    <Compile Include="Threading\Atomic.cs" />
     <Compile Include="Threading\ExecutionQueue.cs" />
     <Compile Include="Threading\RunLoop.cs" />
     <Compile Include="TryFunc.cs" />

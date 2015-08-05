@@ -68,6 +68,13 @@ namespace Meticulous.SandBox
 
         static int Main(string[] args)
         {
+
+            var val = Atomic.Create(false);
+
+            var val2 = Atomic.Create(10);
+
+
+
             Console.CancelKeyPress += (sender, eventArgs) =>
             {
                 eventArgs.Cancel = true;

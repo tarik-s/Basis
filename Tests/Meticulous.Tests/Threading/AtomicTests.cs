@@ -10,7 +10,7 @@ namespace Meticulous.Tests.Threading
 {
 
     public abstract class AtomicBooleanTestsBase<T>
-        where T : IAtomicValue<bool>
+        where T : IAtomic<bool>
     {
         [TestCase(true, true, ExpectedResult = true)]
         [TestCase(true, false, ExpectedResult = false)]

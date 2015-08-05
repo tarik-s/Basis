@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Meticulous.Threading
 {
-    public interface IAtomicValue<T>
+    public interface IAtomic<T>
     {
         T Value { get; set; }
 
@@ -18,7 +18,27 @@ namespace Meticulous.Threading
         T Exchange(T value);
     }
 
-    public sealed class Atomic<T> : IAtomicValue<T>
+    public static class Atomic
+    {
+        public static IAtomic<T> Create<T>(T value)
+        {
+            if (typeof (T) == typeof (bool))
+                return (IAtomic<T>)CreateImpl(typeof(AtomicBoolean), value);
+
+            return (IAtomic<T>) CreateImpl(typeof (Atomic<T>), value);
+        }
+
+        private static object CreateImpl(Type type, object value)
+        {
+            Type[] args = { value.GetType() };
+            var ctor = type.GetConstructor(args);
+            if (ctor == null)
+                throw new MissingMethodException(type.Name, ".ctor");
+            return ctor.Invoke(new []{value});
+        }
+    }
+
+    public sealed class Atomic<T> : IAtomic<T>
     {
         private readonly ReaderWriterLockSlim _lock;
         private T _value;
@@ -86,10 +106,11 @@ namespace Meticulous.Threading
             }
         }
     }
+    
 
     #region AtomicBoolean
 
-    public struct AtomicBooleanValue : IAtomicValue<bool>
+    public struct AtomicBooleanValue : IAtomic<bool>
     {
         private int _value;
 
@@ -116,7 +137,7 @@ namespace Meticulous.Threading
         }
     }
 
-    public sealed class AtomicBoolean : IAtomicValue<bool>
+    public sealed class AtomicBoolean : IAtomic<bool>
     {
         private AtomicBooleanValue _value;
 
