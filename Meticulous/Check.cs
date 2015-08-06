@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,22 +12,31 @@ namespace Meticulous
     {
         #region ArgumentNotNull
 
+        [ContractArgumentValidator]
         public static void This<T>(T @this)
             where T : class
         {
             ArgumentNotNullImpl(@this, "this", "The first argument of extension method is null");
+
+            Contract.EndContractBlock();
         }
 
+        [ContractArgumentValidator]
         public static void ArgumentNotNull<T>(T arg, string paramName)
             where T : class
         {
             ArgumentNotNullImpl(arg, paramName, null);
+
+            Contract.EndContractBlock();
         }
 
+        [ContractArgumentValidator]
         public static void ArgumentNotNull<T>(T arg, string paramName, string message)
             where T : class
         {
             ArgumentNotNullImpl(arg, paramName, message);
+
+            Contract.EndContractBlock();
         }
 
         #endregion
@@ -34,16 +44,22 @@ namespace Meticulous
 
         #region ArgumentInRange
 
+        [ContractArgumentValidator]
         public static void ArgumentInRange<T>(T arg, string paramName, T lo, T hi, string message)
             where T: struct, IComparable<T>
         {
             ArgumentInRangeImpl(arg, paramName, lo, hi, message);
+
+            Contract.EndContractBlock();
         }
 
+        [ContractArgumentValidator]
         public static void ArgumentInRange<T>(T arg, string paramName, T lo, T hi)
             where T : struct, IComparable<T>
         {
             ArgumentInRangeImpl(arg, paramName, lo, hi, null);
+
+            Contract.EndContractBlock();
         }
 
         #endregion
@@ -90,27 +106,27 @@ namespace Meticulous
         #endregion
     }
 
-    public static class CheckDebug
-    {
-        [Conditional("DEBUG")]
-        public static void This<T>(T @this)
-            where T : class
-        {
-            Check.This(@this);
-        }
+    //public static class CheckDebug
+    //{
+    //    [Conditional("DEBUG")]
+    //    public static void This<T>(T @this)
+    //        where T : class
+    //    {
+    //        Check.This(@this);
+    //    }
 
-        [Conditional("DEBUG")]
-        public static void ArgumentNotNull<T>(T arg, string paramName)
-            where T : class
-        {
-            Check.ArgumentNotNull(arg, paramName);
-        }
+    //    [Conditional("DEBUG")]
+    //    public static void ArgumentNotNull<T>(T arg, string paramName)
+    //        where T : class
+    //    {
+    //        Check.ArgumentNotNull(arg, paramName);
+    //    }
 
-        [Conditional("DEBUG")]
-        public static void ArgumentNotNull<T>(T arg, string paramName, string message)
-            where T : class
-        {
-            Check.ArgumentNotNull(arg, paramName, message);
-        }
-    }
+    //    [Conditional("DEBUG")]
+    //    public static void ArgumentNotNull<T>(T arg, string paramName, string message)
+    //        where T : class
+    //    {
+    //        Check.ArgumentNotNull(arg, paramName, message);
+    //    }
+    //}
 }

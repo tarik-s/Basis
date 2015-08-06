@@ -21,7 +21,6 @@ namespace Meticulous.Threading
 
     #endregion
 
-    
     public static class Atomic
     {
         public static IAtomic<T> Create<T>(T value)
@@ -47,24 +46,63 @@ namespace Meticulous.Threading
         }
     }
     
+    #region Atomic<T>
 
     public sealed class Atomic<T> : IAtomic<T>
     {
-        private static readonly IEqualityComparer<T> _equalizer;
+        #region Fields
+
+        private static readonly IEqualityComparer<T> s_comparer;
 
         private readonly ReaderWriterLockSlim _lock;
+        private readonly IEqualityComparer<T> _comparer;
         private T _value;
+
+        #endregion
+
+        #region Construction
 
         static Atomic()
         {
-            _equalizer = EqualityComparer<T>.Default;
+            s_comparer = EqualityComparer<T>.Default;
+        }
+
+        public Atomic()
+            : this(default(T))
+        {
         }
 
         public Atomic(T value)
+            : this(value, s_comparer)
         {
+            
+        }
+
+        public Atomic(T value, IEqualityComparer<T> comparer)
+        {
+            Check.ArgumentNotNull(comparer, "comparer");
+
             _value = value;
             _lock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+            _comparer = comparer;
         }
+
+        public static explicit operator T(Atomic<T> value)
+        {
+            if (value == null)
+                return default(T);
+
+            return value.Value;
+        }
+
+        public static implicit operator Atomic<T>(T value)
+        {
+            return new Atomic<T>(value);
+        }
+
+        #endregion
+
+        #region IAtomic
 
         public T Value
         {
@@ -99,7 +137,7 @@ namespace Meticulous.Threading
             _lock.EnterWriteLock();
             try
             {
-                if (_equalizer.Equals(value, _value))
+                if (_comparer.Equals(value, _value))
                     return false;
 
                 _value = value;
@@ -125,7 +163,11 @@ namespace Meticulous.Threading
                 _lock.ExitWriteLock();
             }
         }
+
+        #endregion
     }
+
+    #endregion
     
 
     #region AtomicBoolean
@@ -137,6 +179,16 @@ namespace Meticulous.Threading
         public AtomicBooleanValue(bool initialValue)
         {
             _value = AtomicHelper.MakeInt(initialValue);
+        }
+
+        public static explicit operator bool(AtomicBooleanValue value)
+        {
+            return value.Value;
+        }
+
+        public static implicit operator AtomicBooleanValue(bool value)
+        {
+            return new AtomicBooleanValue(value);
         }
 
         public bool Value
@@ -161,6 +213,8 @@ namespace Meticulous.Threading
     {
         private AtomicBooleanValue _value;
 
+        #region Construction
+
         public AtomicBoolean()
         {
         }
@@ -169,6 +223,23 @@ namespace Meticulous.Threading
         {
             _value.Exchange(initialValue);
         }
+
+        public static explicit operator bool(AtomicBoolean value)
+        {
+            if (value == null)
+                return false;
+
+            return value.Value;
+        }
+
+        public static implicit operator AtomicBoolean(bool value)
+        {
+            return new AtomicBoolean(value);
+        }
+
+        #endregion
+
+        #region IAtomic
 
         public bool Value
         {
@@ -185,9 +256,12 @@ namespace Meticulous.Threading
         {
             return _value.TrySet(value);
         }
+
+        #endregion
     }
 
     #endregion
+
 
     #region AtomicInteger
 
@@ -195,10 +269,26 @@ namespace Meticulous.Threading
     {
         private int _value;
 
+        #region Construction
+
         public AtomicIntegerValue(int initialValue)
         {
             _value = initialValue;
         }
+
+        public static explicit operator int(AtomicIntegerValue value)
+        {
+            return value.Value;
+        }
+
+        public static implicit operator AtomicIntegerValue(int value)
+        {
+            return new AtomicIntegerValue(value);
+        }
+
+        #endregion
+
+        #region IAtomic
 
         public int Value
         {
@@ -216,11 +306,15 @@ namespace Meticulous.Threading
             var result = Exchange(value);
             return result != value;
         }
+
+        #endregion
     }
 
     public sealed class AtomicInteger : IAtomic<int>
     {
         private AtomicIntegerValue _value;
+
+        #region Construction
 
         public AtomicInteger()
         {
@@ -230,6 +324,24 @@ namespace Meticulous.Threading
         {
             _value.Exchange(initialValue);
         }
+
+
+        public static explicit operator int(AtomicInteger value)
+        {
+            if (value == null)
+                return 0;
+
+            return value.Value;
+        }
+
+        public static implicit operator AtomicInteger(int value)
+        {
+            return new AtomicInteger(value);
+        }
+
+        #endregion
+
+        #region IAtomic
 
         public int Value
         {
@@ -246,9 +358,116 @@ namespace Meticulous.Threading
         {
             return _value.TrySet(value);
         }
+
+        #endregion
     }
 
     #endregion
+
+
+    #region AtomicReference
+
+    public struct AtomicReferenceValue<T> : IAtomic<T>
+        where T : class 
+    {
+        private T _value;
+
+        #region Construction
+
+        public AtomicReferenceValue(T initialValue)
+        {
+            _value = initialValue;
+        }
+
+        public static explicit operator T(AtomicReferenceValue<T> value)
+        {
+            return value.Value;
+        }
+
+        public static implicit operator AtomicReferenceValue<T>(T value)
+        {
+            return new AtomicReferenceValue<T>(value);
+        }
+
+        #endregion
+
+        #region IAtomic
+
+        public T Value
+        {
+            get { return Interlocked.CompareExchange(ref _value, null, null); }
+            set { Exchange(value); }
+        }
+
+        public T Exchange(T value)
+        {
+            return Interlocked.Exchange(ref _value, value);
+        }
+
+        public bool TrySet(T value)
+        {
+            var result = Exchange(value);
+            return !ReferenceEquals(result, value);
+        }
+
+        #endregion
+    }
+
+    public sealed class AtomicReference<T> : IAtomic<T>
+        where T : class
+    {
+        private AtomicReferenceValue<T> _value;
+
+        #region Construction
+
+        public AtomicReference()
+        {
+        }
+
+        public AtomicReference(T initialValue)
+        {
+            _value.Exchange(initialValue);
+        }
+
+
+        public static explicit operator T(AtomicReference<T> value)
+        {
+            if (value == null)
+                return default(T);
+
+            return value.Value;
+        }
+
+        public static implicit operator AtomicReference<T>(T value)
+        {
+            return new AtomicReference<T>(value);
+        }
+
+        #endregion
+
+        #region IAtomic
+
+        public T Value
+        {
+            get { return _value.Value; }
+            set { _value.Exchange(value); }
+        }
+
+        public T Exchange(T value)
+        {
+            return _value.Exchange(value);
+        }
+
+        public bool TrySet(T value)
+        {
+            return _value.TrySet(value);
+        }
+
+        #endregion
+    }
+
+    #endregion
+
 
 
     internal static class AtomicHelper

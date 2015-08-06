@@ -1,21 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+
+using System.Diagnostics.Contracts;
+
 using Meticulous.Threading;
+using Meticulous.IO;
 
 namespace Meticulous.SandBox
 {
 
     public sealed class Remote<T>
     {
+        private readonly Atomic<TaskCompletionSource<T>> _tcs;
+
         private T _value;
+        
 
         public Remote(T value)
         {
             _value = value;
+            _tcs = new Atomic<TaskCompletionSource<T>>(new TaskCompletionSource<T>());
         }
 
         public static implicit operator Remote<T>(T value)
@@ -39,8 +49,22 @@ namespace Meticulous.SandBox
             set
             {
                 _value = value;
+                var tcs = _tcs.Exchange(new TaskCompletionSource<T>());
+                tcs.SetResult(value);
                 EventArgs.Empty.Raise(this, ref Changed);
             }
+        }
+
+
+        public void Stop()
+        {
+            _tcs.Value.SetCanceled();
+        }
+
+        public async Task<T> GetNewValueAsync()
+        {
+            var task = _tcs.Value.Task;
+            return await task.ConfigureAwait(false);
         }
 
         public override string ToString()
@@ -74,12 +98,52 @@ namespace Meticulous.SandBox
         {
         }
 
+        private static async void TestDelay()
+        {
+            Console.WriteLine("hello");
+
+            throw new Exception();
+
+            await Task.Delay(10).ContinueWith(_ =>
+            {
+                Console.WriteLine("hello222");
+            });
+            Console.WriteLine("ooops");
+            //await Task.Delay(1);
+        }
+
+        private static Task TestDelay2()
+        {
+            Console.WriteLine("hello");
+
+            throw new Exception();
+
+            var ctx = SynchronizationContext.Current;
+            return Task.Delay(10).ContinueWith(t =>
+            {
+                ctx.Post((a) =>
+                {
+                    Console.WriteLine("aaaaaaaaaaaaa");
+                }, null);
+            });
+        }
+
         static int Main(string[] args)
         {
 
-            var infs = typeof (Test).GetInterfaces();
+            Contract.ContractFailed += delegate(object sender, ContractFailedEventArgs eventArgs)
+            {
+                
+            };
+            Contract.Requires(args.Length == 0);
 
-            var val = Atomic.Create(false);
+            var di = new DirectoryInfo(@"D:\");
+
+            var dci = di.GetContentsInfo(ExceptionHandler.Create(e =>
+            {
+                Console.WriteLine(e.Message);
+                return true;
+            }));
 
             var val2 = new Atomic<int>(10);
             Console.WriteLine(val2.TrySet(10));
@@ -112,29 +176,33 @@ namespace Meticulous.SandBox
                 RunLoop.MainLoop.Stop(-1);
             };
 
-            var result = RunLoop.Main(() =>
+            var version = 0;
+
+            Task.Factory.StartNew(async () =>
             {
-                Console.WriteLine(_serverVersion);
-
-                _serverVersion.Changed += delegate(object sender, EventArgs eventArgs)
+                while (true)
                 {
-                    Console.WriteLine(_serverVersion);
-                };
+                    await Task.Delay(100).ConfigureAwait(false);
+                    ++version;
+                    _serverVersion.Value = version.ToString();
 
-
-                var handler = new HttpClientHandler();
-                var client = new HttpClient(handler);
-
-                client.GetStringAsync("http://ibackuper.com/version.php").ContinueWith(t =>
-                {
-                    _serverVersion.Value = t.Result;
-                });
+                    if (version > 20)
+                    {
+                        _serverVersion.Stop();
+                        break;
+                    }
+                }
             });
 
+            var result = RunLoop.Main(() =>
+            {
+                while (true)
+                {
+                    var newVersion = _serverVersion.GetNewValueAsync().Result;
+                    Console.WriteLine(newVersion);
+                }
+            });
 
-
-
-            
 
             //Console.ReadKey();
             Environment.ExitCode = result;

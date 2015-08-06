@@ -281,6 +281,7 @@ namespace Meticulous.Threading
             Check.OperationValid(_state == State.Working, "Queue is already stopp(ing)/(ed)");
         }
 
+        #region Private classes
 
         [Serializable]
         private enum State
@@ -300,7 +301,7 @@ namespace Meticulous.Threading
             Stop
         }
 
-        private class ExecutionItem
+        private sealed class ExecutionItem
         {
             private readonly Action _action;
             private readonly CancellationToken _token;
@@ -376,6 +377,7 @@ namespace Meticulous.Threading
             }
         }
 
+        #endregion
     }
 
     public sealed class ExecutionQueueUnhandledExceptionEventArgs : EventArgs
