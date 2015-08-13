@@ -161,7 +161,7 @@ namespace Meticulous.SandBox
                 }
             });
 
-            var result = RunLoop.Main(() =>
+            var result = RunLoop.RunMain(() =>
             {
                 while (true)
                 {

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Meticulous
 {
+    /// <summary>
+    /// The base class for exception handling
+    /// </summary>
     public abstract class ExceptionHandler
     {
         #region Fields
@@ -15,16 +18,27 @@ namespace Meticulous
 
         #endregion
         
+        /// <summary>
+        /// Gets an instance of <see cref="ExceptionHandler"/> which handles of exceptions.
+        /// </summary>
         public static ExceptionHandler AlwaysHandling
         {
             get { return _alwaysHandling; }
         }
 
+        /// <summary>
+        /// Gets an instance of <see cref="ExceptionHandler"/> which doesn't handle any exception.
+        /// </summary>
         public static ExceptionHandler NeverHandling
         {
             get { return _neverHandling; }
         }
 
+        /// <summary>
+        /// Creates an instance of <see cref="ExceptionHandler"/> with specific handling delegate
+        /// </summary>
+        /// <param name="handler">The handler.</param>
+        /// <returns>Return new instance</returns>
         public static ExceptionHandler Create(Func<Exception, object, bool> handler)
         {
             Check.ArgumentNotNull(handler, "handler");
@@ -32,6 +46,11 @@ namespace Meticulous
             return new DefaultHandler(handler);
         }
 
+        /// <summary>
+        /// Creates an instance of <see cref="ExceptionHandler"/>  with specific handling delegate
+        /// </summary>
+        /// <param name="handler">The handler.</param>
+        /// <returns>Return new instance</returns>
         public static ExceptionHandler Create(Func<Exception, bool> handler)
         {
             Check.ArgumentNotNull(handler, "handler");
@@ -39,16 +58,36 @@ namespace Meticulous
             return new DefaultHandler((e, _) => handler(e));
         }
 
+
+        /// <summary>
+        /// Handles the exception.
+        /// </summary>
+        /// <param name="exception">The exception.</param>
+        /// <returns>Returns true is exception is handled successfully, otherwise false</returns>
         public bool HandleException(Exception exception)
         {
             return HandleExceptionImpl(exception, null);
         }
 
+
+        /// <summary>
+        /// Handles the exception.
+        /// </summary>
+        /// <param name="exception">The exception.</param>
+        /// <param name="state">The state.</param>
+        /// <returns>Returns true is exception is handled successfully, otherwise false</returns>
         public bool HandleException(Exception exception, object state)
         {
             return HandleExceptionImpl(exception, state);
         }
 
+
+        /// <summary>
+        /// Handles the exception implementation.
+        /// </summary>
+        /// <param name="exception">The exception.</param>
+        /// <param name="state">The state.</param>
+        /// <returns>Returns true is exception is handled successfully, otherwise false</returns>
         protected abstract bool HandleExceptionImpl(Exception exception, object state);
 
         #region Private implementations

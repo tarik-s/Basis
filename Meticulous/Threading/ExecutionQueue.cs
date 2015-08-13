@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -9,12 +10,26 @@ using System.Xml.Schema;
 
 namespace Meticulous.Threading
 {
+
+    /// <summary>
+    /// Execution queue processor type
+    /// </summary>
     public enum ExecutionQueueProcessorType
     {
+        /// <summary>
+        /// All task are performed on the separate thread
+        /// </summary>
         Thread,
+
+        /// <summary>
+        /// All task are performed on the thread pool
+        /// </summary>
         ThreadPool
     }
 
+    /// <summary>
+    /// Represens an execution queue
+    /// </summary>
     public sealed class ExecutionQueue : IDisposable
     {
         #region Fields
@@ -40,28 +55,47 @@ namespace Meticulous.Threading
             _processor = processorFactory(Execute);
         }
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="ExecutionQueue"/> class.
+        /// </summary>
         public static ExecutionQueue Create()
         {
             return Create(ExecutionQueueProcessorType.ThreadPool);
         }
 
-        public static ExecutionQueue Create(ExecutionQueueProcessorType type)
+        /// <summary>
+        /// Creates a new instance of the <see cref="ExecutionQueue"/> class.
+        /// </summary>
+        /// <param name="processorType">The processor factory.</param>
+        public static ExecutionQueue Create(ExecutionQueueProcessorType processorType)
         {
-            return new ExecutionQueue(action => ExecutionQueueProcessor.Create(type, action));
+            return new ExecutionQueue(action => ExecutionQueueProcessor.Create(processorType, action));
         }
 
         #endregion
 
+        /// <summary>
+        /// Occurs when [unhandled exception] occurred.
+        /// </summary>
         public event EventHandler<ExecutionQueueUnhandledExceptionEventArgs> UnhandledException;
 
 
         #region Post
 
+        /// <summary>
+        /// Posts the specified action.
+        /// </summary>
+        /// <param name="action">The action.</param>
         public void Post(Action action)
         {
             Post(action, CancellationToken.None);
         }
 
+        /// <summary>
+        /// Posts the specified action.
+        /// </summary>
+        /// <param name="action">The action.</param>
+        /// <param name="token">The cancellation token.</param>
         public void Post(Action action, CancellationToken token)
         {
             Check.ArgumentNotNull(action, "action");
@@ -75,11 +109,21 @@ namespace Meticulous.Threading
 
         #region Send
 
+        /// <summary>
+        /// Sends the specified action.
+        /// </summary>
+        /// <param name="action">The action.</param>
         public void Send(Action action)
         {
             Send(action, CancellationToken.None);
         }
 
+        /// <summary>
+        /// Sends the specified action.
+        /// </summary>
+        /// <param name="action">The action.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <exception cref="System.AggregateException"></exception>
         public void Send(Action action, CancellationToken token)
         {
             Check.ArgumentNotNull(action, "action");
@@ -105,11 +149,22 @@ namespace Meticulous.Threading
 
         #region StartTask
 
+        /// <summary>
+        /// Starts the task.
+        /// </summary>
+        /// <param name="action">The action.</param>
+        /// <returns></returns>
         public Task StartTask(Action action)
         {
             return StartTask(action, CancellationToken.None);
         }
 
+        /// <summary>
+        /// Starts the task.
+        /// </summary>
+        /// <param name="action">The action.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
         public Task StartTask(Action action, CancellationToken token)
         {
             Check.ArgumentNotNull(action, "action");
@@ -120,11 +175,24 @@ namespace Meticulous.Threading
             return factory.StartNew(action, token, factory.CreationOptions, scheduler);
         }
 
+        /// <summary>
+        /// Starts the task.
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="func">The function.</param>
+        /// <returns></returns>
         public Task<TResult> StartTask<TResult>(Func<TResult> func)
         {
             return StartTask(func, CancellationToken.None);
         }
 
+        /// <summary>
+        /// Starts the task.
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="func">The function.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
         public Task<TResult> StartTask<TResult>(Func<TResult> func, CancellationToken token)
         {
             Check.ArgumentNotNull(func, "func");
@@ -137,6 +205,10 @@ namespace Meticulous.Threading
 
         #endregion
 
+        /// <summary>
+        /// Stops this queue.
+        /// </summary>
+        /// <returns></returns>
         public bool Stop()
         {
             CheckNotDisposed();
@@ -159,11 +231,19 @@ namespace Meticulous.Threading
             return true;
         }
 
+        /// <summary>
+        /// Waits the queue to be finished.
+        /// </summary>
         public void Wait()
         {
             Wait(Timeout.InfiniteTimeSpan);
         }
 
+        /// <summary>
+        /// Waits the queue to be finished.
+        /// </summary>
+        /// <param name="timeout">The timeout.</param>
+        /// <returns>Returns true if the queue has been finished, otherwise false.</returns>
         public bool Wait(TimeSpan timeout)
         {
             CheckNotDisposed();
@@ -173,6 +253,9 @@ namespace Meticulous.Threading
 
         #region IDisposable
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
         public void Dispose()
         {
             if (_state == State.Disposed)
@@ -380,14 +463,25 @@ namespace Meticulous.Threading
         #endregion
     }
 
+    /// <summary>
+    /// ExecutionQueueUnhandledExceptionEventArgs
+    /// </summary>
     public sealed class ExecutionQueueUnhandledExceptionEventArgs : EventArgs
     {
         private readonly Exception _exception;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ExecutionQueueUnhandledExceptionEventArgs"/> class.
+        /// </summary>
+        /// <param name="exception">The exception.</param>
         public ExecutionQueueUnhandledExceptionEventArgs(Exception exception)
         {
             _exception = exception;
         }
 
+        /// <summary>
+        /// Gets the exception.
+        /// </summary>
         public Exception Exception
         {
             get { return _exception; }

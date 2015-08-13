@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Meticulous.Threading
 {
+    /// <summary>
+    /// Represent a run loop
+    /// </summary>
     public sealed class RunLoop : IDisposable
     {
         [ThreadStatic]
@@ -30,21 +33,34 @@ namespace Meticulous.Threading
             _queue = new ExecutionQueue(action => new ExecutionQueueProcessorImpl(this, action));
         }
 
+        /// <summary>
+        /// Gets the current thread run loop.
+        /// </summary>
         public static RunLoop Current
         {
             get { return _currentLoop; }
         }
 
+        /// <summary>
+        /// Gets the current thread main run loop.
+        /// </summary>
         public static RunLoop MainLoop
         {
             get { return _mainLoop; }
         }
 
+        /// <summary>
+        /// Gets the thread identifier the loop is running on.
+        /// </summary>
         public int ThreadId
         {
             get { return _threadId; }
         }
 
+        /// <summary>
+        /// Stops the loop with the specified exit code.
+        /// </summary>
+        /// <param name="exitCode">The exit code.</param>
         public void Stop(int exitCode)
         {
             _exitCode = exitCode;
@@ -52,27 +68,47 @@ namespace Meticulous.Threading
             _signal.Set();
         }
 
+        /// <summary>
+        /// Stops the loop.
+        /// </summary>
         public void Stop()
         {
             Stop(0);
         }
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
         public void Dispose()
         {
             _queue.Dispose();
         }
 
+        /// <summary>
+        /// Runs the loop on the current thread
+        /// </summary>
+        /// <returns>Returns the exit code the loop was stopped with.</returns>
         public static int Run()
         {
             return Run(null);
         }
 
+        /// <summary>
+        /// Runs the loop on the current thread
+        /// </summary>
+        /// <param name="initialAction">The initial action.</param>
+        /// <returns>Returns the exit code the loop was stopped with.</returns>
         public static int Run(Action initialAction)
         {
             return RunImpl(initialAction, false);
         }
 
-        public static int Main(Action initialAction)
+        /// <summary>
+        /// Runs the main loop on the current thread.
+        /// </summary>
+        /// <param name="initialAction">The initial action.</param>
+        /// <returns>Returns the exit code the loop was stopped with.</returns>
+        public static int RunMain(Action initialAction)
         {
             Check.OperationValid(_mainLoop == null, "Main loop is already started");
             Check.OperationValid(_currentLoop == null, "Main loop cannot run within another loop");

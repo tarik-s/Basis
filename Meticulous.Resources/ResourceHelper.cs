@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Meticulous.Resources
 {
-    public static class ResourceHelper
+    internal static class ResourceHelper
     {
         public static void CheckResourceNameValid(string name)
         {

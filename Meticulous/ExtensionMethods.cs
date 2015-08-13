@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Meticulous
 {
+    /// <summary>
+    /// Extension methods
+    /// </summary>
     public static class ExtensionMethods
     {
         #region Raise
@@ -71,6 +74,13 @@ namespace Meticulous
 
         #region FitIn
 
+        /// <summary>
+        /// Fits "this" in range.
+        /// </summary>
+        /// <param name="this">The this.</param>
+        /// <param name="lo">The lo.</param>
+        /// <param name="hi">The hi.</param>
+        /// <returns></returns>
         public static int FitIn(this int @this, int lo, int hi)
         {
             if (@this < lo)
@@ -80,6 +90,13 @@ namespace Meticulous
             return @this;
         }
 
+        /// <summary>
+        /// Fits "this" in range.
+        /// </summary>
+        /// <param name="this">The this.</param>
+        /// <param name="lo">The lo.</param>
+        /// <param name="hi">The hi.</param>
+        /// <returns></returns>
         public static long FitIn(this long @this, long lo, long hi)
         {
             if (@this < lo)
@@ -89,6 +106,13 @@ namespace Meticulous
             return @this;
         }
 
+        /// <summary>
+        /// Fits "this" in range.
+        /// </summary>
+        /// <param name="this">The this.</param>
+        /// <param name="lo">The lo.</param>
+        /// <param name="hi">The hi.</param>
+        /// <returns></returns>
         public static float FitIn(this float @this, float lo, float hi)
         {
             if (@this < lo)
@@ -98,6 +122,13 @@ namespace Meticulous
             return @this;
         }
 
+        /// <summary>
+        /// Fits "this" in range.
+        /// </summary>
+        /// <param name="this">The this.</param>
+        /// <param name="lo">The lo.</param>
+        /// <param name="hi">The hi.</param>
+        /// <returns></returns>
         public static double FitIn(this double @this, double lo, int hi)
         {
             if (@this < lo)

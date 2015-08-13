@@ -9,6 +9,9 @@ using Meticulous.Patterns;
 
 namespace Meticulous.IO
 {
+    /// <summary>
+    /// Represents directory contents info
+    /// </summary>
     public sealed class DirectoryContentsInfo
     {
         #region Fields
@@ -29,12 +32,19 @@ namespace Meticulous.IO
         private readonly long _totalSizeOnDisk;
 
         #endregion
-        
+
+        /// <summary>
+        /// Gets the default size of the page.
+        /// </summary>
         public static int DefaultPageSize
         {
             get { return 4 * 1024; }
         }
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="DirectoryContentsInfo"/> class.
+        /// </summary>
+        /// <param name="directoryInfo">The directory info.</param>
         public static DirectoryContentsInfo Create(DirectoryInfo directoryInfo)
         {
             Check.ArgumentNotNull(directoryInfo, "directoryInfo");
@@ -42,6 +52,12 @@ namespace Meticulous.IO
             return CreateImpl(directoryInfo, CancellationToken.None, ExceptionHandler.NeverHandling);
         }
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="DirectoryContentsInfo"/> class.
+        /// </summary>
+        /// <param name="directoryInfo">The directory info.</param>
+        /// <param name="exceptionHandler">The exception handler.</param>
+        /// <returns></returns>
         public static DirectoryContentsInfo Create(DirectoryInfo directoryInfo, ExceptionHandler exceptionHandler)
         {
             Check.ArgumentNotNull(directoryInfo, "directoryInfo");
@@ -50,6 +66,12 @@ namespace Meticulous.IO
             return CreateImpl(directoryInfo, CancellationToken.None, exceptionHandler);
         }
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="DirectoryContentsInfo"/> class.
+        /// </summary>
+        /// <param name="directoryInfo">The directory info.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
         public static DirectoryContentsInfo Create(DirectoryInfo directoryInfo, CancellationToken cancellationToken)
         {
             Check.ArgumentNotNull(directoryInfo, "directoryInfo");
@@ -57,6 +79,13 @@ namespace Meticulous.IO
             return CreateImpl(directoryInfo, cancellationToken, ExceptionHandler.NeverHandling);
         }
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="DirectoryContentsInfo"/> class.
+        /// </summary>
+        /// <param name="directoryInfo">The directory info.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="exceptionHandler">The exception handler.</param>
+        /// <returns></returns>
         public static DirectoryContentsInfo Create(DirectoryInfo directoryInfo, CancellationToken cancellationToken, 
             ExceptionHandler exceptionHandler)
         {
@@ -89,18 +118,33 @@ namespace Meticulous.IO
 
         #region Count
 
+        /// <summary>
+        /// Gets the file count.
+        /// </summary>
         public int FileCount
         {
             get { return _fileCount; }
         }
+
+        /// <summary>
+        /// Gets the directory count.
+        /// </summary>
         public int DirectoryCount
         {
             get { return _directoryCount; }
         }
+
+        /// <summary>
+        /// Gets the symlink count.
+        /// </summary>
         public int SymlinkCount
         {
             get { return _symlinkCount; }
         }
+
+        /// <summary>
+        /// Gets the total filesystem entry count.
+        /// </summary>
         public int TotalCount
         {
             get { return _totalCount; }
@@ -110,18 +154,34 @@ namespace Meticulous.IO
 
         #region Size
 
+        /// <summary>
+        /// Gets the size of the file.
+        /// </summary>
         public long FileSize
         {
             get { return _fileSize; }
         }
+
+
+        /// <summary>
+        /// Gets the size of the directory.
+        /// </summary>
         public long DirectorySize
         {
             get { return _directorySize; }
         }
+
+        /// <summary>
+        /// Gets the size of the symlink.
+        /// </summary>
         public long SymlinkSize
         {
             get { return _symlinkSize; }
         }
+
+        /// <summary>
+        /// Gets the total size of the file system entries.
+        /// </summary>
         public long TotalSize
         {
             get { return _totalSize; }
@@ -131,18 +191,33 @@ namespace Meticulous.IO
 
         #region Size on Disk
 
+        /// <summary>
+        /// Gets the file size on disk.
+        /// </summary>
         public long FileSizeOnDisk
         {
             get { return _fileSizeOnDisk; }
         }
+
+        /// <summary>
+        /// Gets the directory size on disk.
+        /// </summary>
         public long DirectorySizeOnDisk
         {
             get { return _directorySizeOnDisk; }
         }
+
+        /// <summary>
+        /// Gets the symlink size on disk.
+        /// </summary>
         public long SymlinkSizeOnDisk
         {
             get { return _symlinkSizeOnDisk; }
         }
+
+        /// <summary>
+        /// Gets the total size of filesystem entries on disk.
+        /// </summary>
         public long TotalSizeOnDisk
         {
             get { return _totalSizeOnDisk; }
@@ -228,6 +303,9 @@ namespace Meticulous.IO
     }
 
 
+    /// <summary>
+    /// DirectoryContentsInfo Builder
+    /// </summary>
     public sealed class DirectoryContentsInfoBuilder : IBuilder<DirectoryContentsInfo>
     {
         #region Fields
@@ -248,11 +326,18 @@ namespace Meticulous.IO
 
         #endregion
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DirectoryContentsInfoBuilder"/> class.
+        /// </summary>
         public DirectoryContentsInfoBuilder()
-            : this(DirectoryContentsInfo.DefaultPageSize)
         {
+            _pageSize = DirectoryContentsInfo.DefaultPageSize;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DirectoryContentsInfoBuilder"/> class.
+        /// </summary>
+        /// <param name="pageSize">Size of the page.</param>
         public DirectoryContentsInfoBuilder(int pageSize)
         {
             Check.ArgumentInRange(pageSize, "pageSize", 1, int.MaxValue);
@@ -260,6 +345,10 @@ namespace Meticulous.IO
             _pageSize = pageSize;
         }
 
+        /// <summary>
+        /// Builds a new instance of the <see cref="DirectoryContentsInfo"/> class
+        /// </summary>
+        /// <returns></returns>
         public DirectoryContentsInfo Build()
         {
             return new DirectoryContentsInfo(this);
@@ -267,40 +356,73 @@ namespace Meticulous.IO
 
         #region Properties
 
+        /// <summary>
+        /// Gets the file count.
+        /// </summary>
         public int FileCount
         {
             get { return _fileCount; }
         }
+
+        /// <summary>
+        /// Gets the directory count.
+        /// </summary>
         public int DirectoryCount
         {
             get { return _directoryCount; }
         }
+
+        /// <summary>
+        /// Gets the symlink count.
+        /// </summary>
         public int SymlinkCount
         {
             get { return _symlinkCount; }
         }
 
+        /// <summary>
+        /// Gets the size of the files.
+        /// </summary>
         public long FileSize
         {
             get { return _fileSize; }
         }
+
+        /// <summary>
+        /// Gets the size of the directories.
+        /// </summary>
         public long DirectorySize
         {
             get { return _directorySize; }
         }
+
+        /// <summary>
+        /// Gets the size of the symlinks.
+        /// </summary>
         public long SymlinkSize
         {
             get { return _symlinkSize; }
         }
 
+        /// <summary>
+        /// Gets the file size on disk.
+        /// </summary>
         public long FileSizeOnDisk
         {
             get { return _fileSizeOnDisk; }
         }
+
+        /// <summary>
+        /// Gets the directory size on disk.
+        /// </summary>
         public long DirectorySizeOnDisk
         {
             get { return _directorySizeOnDisk; }
         }
+
+        /// <summary>
+        /// Gets the symlink size on disk.
+        /// </summary>
         public long SymlinkSizeOnDisk
         {
             get { return _symlinkSizeOnDisk; }
@@ -310,32 +432,47 @@ namespace Meticulous.IO
 
         #region Operations
 
+        /// <summary>
+        /// Adds the file.
+        /// </summary>
+        /// <param name="fileSize">Size of the file.</param>
         public void AddFile(long fileSize)
         {
-            CheckSize(fileSize, "fileSize");
+            Check.ArgumentInRange(fileSize, "fileSize", 0, long.MaxValue);
 
             ++_fileCount;
             _fileSize += fileSize;
             _fileSizeOnDisk += AlignSize(fileSize);
         }
 
+        /// <summary>
+        /// Adds the symlink.
+        /// </summary>
+        /// <param name="symlinkSize">Size of the symlink.</param>
         public void AddSymlink(long symlinkSize)
         {
-            CheckSize(symlinkSize, "symlinkSize");
+            Check.ArgumentInRange(symlinkSize, "symlinkSize", 0, long.MaxValue);
 
             ++_symlinkCount;
             _symlinkSize += symlinkSize;
             _symlinkSizeOnDisk += AlignSize(symlinkSize);
         }
 
+        /// <summary>
+        /// Adds the directory.
+        /// </summary>
         public void AddDirectory()
         {
             AddDirectory(0);
         }
 
+        /// <summary>
+        /// Adds the directory.
+        /// </summary>
+        /// <param name="directorySize">Size of the directory.</param>
         public void AddDirectory(long directorySize)
         {
-            CheckSize(directorySize, "directorySize");
+            Check.ArgumentInRange(directorySize, "directorySize", 0, long.MaxValue);
 
             ++_directoryCount;
 
@@ -353,12 +490,6 @@ namespace Meticulous.IO
                 return size;
 
             return (size / _pageSize + 1) * _pageSize;
-        }
-
-        private static void CheckSize(long size, string paramName)
-        {
-            if (size < 0)
-                throw new ArgumentOutOfRangeException(paramName, size, "Size must not be less then zero");
         }
 
         #endregion
