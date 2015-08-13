@@ -16,7 +16,8 @@ namespace Meticulous
         public static void This<T>(T @this)
             where T : class
         {
-            ArgumentNotNullImpl(@this, "this", "The first argument of extension method is null");
+            if (@this == null)
+                throw new ArgumentNullException("this", "The first argument of extension method is null");
 
             Contract.EndContractBlock();
         }
@@ -25,7 +26,8 @@ namespace Meticulous
         public static void ArgumentNotNull<T>(T arg, string paramName)
             where T : class
         {
-            ArgumentNotNullImpl(arg, paramName, null);
+            if (arg == null)
+                throw new ArgumentNullException(paramName);
 
             Contract.EndContractBlock();
         }
@@ -34,7 +36,8 @@ namespace Meticulous
         public static void ArgumentNotNull<T>(T arg, string paramName, string message)
             where T : class
         {
-            ArgumentNotNullImpl(arg, paramName, message);
+            if (arg == null)
+                throw new ArgumentNullException(paramName, message);
 
             Contract.EndContractBlock();
         }
@@ -48,7 +51,11 @@ namespace Meticulous
         public static void ArgumentInRange<T>(T arg, string paramName, T lo, T hi, string message)
             where T: struct, IComparable<T>
         {
-            ArgumentInRangeImpl(arg, paramName, lo, hi, message);
+            if (lo.CompareTo(arg) > 0)
+                throw new ArgumentOutOfRangeException(paramName, message);
+
+            if (hi.CompareTo(arg) < 0)
+                throw new ArgumentOutOfRangeException(paramName, message);
 
             Contract.EndContractBlock();
         }
@@ -57,8 +64,12 @@ namespace Meticulous
         public static void ArgumentInRange<T>(T arg, string paramName, T lo, T hi)
             where T : struct, IComparable<T>
         {
-            ArgumentInRangeImpl(arg, paramName, lo, hi, null);
+            if (lo.CompareTo(arg) > 0)
+                throw new ArgumentOutOfRangeException(paramName);
 
+            if (hi.CompareTo(arg) < 0)
+                throw new ArgumentOutOfRangeException(paramName);
+            
             Contract.EndContractBlock();
         }
 
@@ -74,59 +85,36 @@ namespace Meticulous
 
         #endregion
 
-        #region Impl
+        //#region Impl
 
-        private static void ArgumentNotNullImpl<T>(T arg, string paramName, string message)
-            where T : class
-        {
-            if (arg != null)
-                return;
+        //private static void ArgumentNotNullImpl<T>(T arg, string paramName, string message)
+        //    where T : class
+        //{
+        //    if (arg != null)
+        //        return;
 
-            if (message == null)
-                throw new ArgumentNullException(paramName);
+        //    if (message == null)
+        //        throw new ArgumentNullException(paramName);
 
-            throw new ArgumentNullException(paramName, message);
-        }
+        //    throw new ArgumentNullException(paramName, message);
+        //}
 
-        private static void ArgumentInRangeImpl<T>(T arg, string paramName, T lo, T hi, string message)
-            where T : struct, IComparable<T>
-        {
-            if (lo.CompareTo(arg) <= 0)
-            {
-                if (hi.CompareTo(arg) >= 0)
-                    return;
-            }
+        //private static void ArgumentInRangeImpl<T>(T arg, string paramName, T lo, T hi, string message)
+        //    where T : struct, IComparable<T>
+        //{
+        //    if (lo.CompareTo(arg) <= 0)
+        //    {
+        //        if (hi.CompareTo(arg) >= 0)
+        //            return;
+        //    }
 
-            if (message == null)
-                throw new ArgumentOutOfRangeException(paramName);
+        //    if (message == null)
+        //        throw new ArgumentOutOfRangeException(paramName);
 
-            throw new ArgumentOutOfRangeException(paramName, message);
-        }
+        //    throw new ArgumentOutOfRangeException(paramName, message);
+        //}
 
-        #endregion
+        //#endregion
     }
 
-    //public static class CheckDebug
-    //{
-    //    [Conditional("DEBUG")]
-    //    public static void This<T>(T @this)
-    //        where T : class
-    //    {
-    //        Check.This(@this);
-    //    }
-
-    //    [Conditional("DEBUG")]
-    //    public static void ArgumentNotNull<T>(T arg, string paramName)
-    //        where T : class
-    //    {
-    //        Check.ArgumentNotNull(arg, paramName);
-    //    }
-
-    //    [Conditional("DEBUG")]
-    //    public static void ArgumentNotNull<T>(T arg, string paramName, string message)
-    //        where T : class
-    //    {
-    //        Check.ArgumentNotNull(arg, paramName, message);
-    //    }
-    //}
 }

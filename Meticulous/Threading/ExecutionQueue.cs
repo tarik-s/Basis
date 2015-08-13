@@ -64,8 +64,8 @@ namespace Meticulous.Threading
 
         public void Post(Action action, CancellationToken token)
         {
-            CheckWorking();
             Check.ArgumentNotNull(action, "action");
+            CheckWorking();
 
             var item = new ExecutionItem(ExecutionItemOrigin.Post, action, token);
             Enqueue(item);
@@ -82,8 +82,8 @@ namespace Meticulous.Threading
 
         public void Send(Action action, CancellationToken token)
         {
-            CheckWorking();
             Check.ArgumentNotNull(action, "action");
+            CheckWorking();
 
             token.ThrowIfCancellationRequested();
 
@@ -112,8 +112,8 @@ namespace Meticulous.Threading
 
         public Task StartTask(Action action, CancellationToken token)
         {
-            CheckWorking();
             Check.ArgumentNotNull(action, "action");
+            CheckWorking();
 
             var scheduler = _scheduler.Value;
             var factory = Task.Factory;
@@ -127,8 +127,8 @@ namespace Meticulous.Threading
 
         public Task<TResult> StartTask<TResult>(Func<TResult> func, CancellationToken token)
         {
-            CheckWorking();
             Check.ArgumentNotNull(func, "func");
+            CheckWorking();
 
             var scheduler = _scheduler.Value;
             var factory = Task<TResult>.Factory;

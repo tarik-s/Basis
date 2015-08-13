@@ -98,44 +98,11 @@ namespace Meticulous.SandBox
         {
         }
 
-        private static async void TestDelay()
-        {
-            Console.WriteLine("hello");
-
-            throw new Exception();
-
-            await Task.Delay(10).ContinueWith(_ =>
-            {
-                Console.WriteLine("hello222");
-            });
-            Console.WriteLine("ooops");
-            //await Task.Delay(1);
-        }
-
-        private static Task TestDelay2()
-        {
-            Console.WriteLine("hello");
-
-            throw new Exception();
-
-            var ctx = SynchronizationContext.Current;
-            return Task.Delay(10).ContinueWith(t =>
-            {
-                ctx.Post((a) =>
-                {
-                    Console.WriteLine("aaaaaaaaaaaaa");
-                }, null);
-            });
-        }
-
         static int Main(string[] args)
         {
-
-            Contract.ContractFailed += delegate(object sender, ContractFailedEventArgs eventArgs)
-            {
+            Contract.ContractFailed += delegate {
                 
             };
-            Contract.Requires(args.Length == 0);
 
             var di = new DirectoryInfo(@"D:\");
 
@@ -204,24 +171,12 @@ namespace Meticulous.SandBox
             });
 
 
-            //Console.ReadKey();
+            Console.WriteLine("Press any key...");
+            Console.ReadKey();
+
             Environment.ExitCode = result;
             return result;
 
-            
-
-            using (var q = ExecutionQueue.Create())
-            {
-                q.Post(() =>
-                {
-                    q.Stop();
-                });
-
-                q.Wait();
-            }
-
-            Console.WriteLine("Press any key...");
-            Console.ReadKey();
         }
     }
 }

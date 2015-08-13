@@ -42,5 +42,10 @@ namespace Meticulous.Resources
         {
             get { return _defaultValue; }
         }
+
+        internal void SetProvider(TryFunc<CultureInfo, T> provider)
+        {
+            _provider = provider;
+        }
     }
 }
