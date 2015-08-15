@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using System.Diagnostics.Contracts;
-
+using Meticulous.Collections.Generic;
 using Meticulous.Threading;
 using Meticulous.IO;
 
@@ -100,6 +100,14 @@ namespace Meticulous.SandBox
 
         static int Main(string[] args)
         {
+            var node = new TreeNode<int>(10);
+
+            foreach (var subNode in node)
+            {
+                Console.WriteLine(subNode.Data);
+            }
+
+
             Contract.ContractFailed += delegate {
                 
             };

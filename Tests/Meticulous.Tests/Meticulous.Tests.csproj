@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CheckTests.cs" />
+    <Compile Include="Collections\Generic\TreeNodeTests.cs" />
     <Compile Include="ExceptionHandlerTests.cs" />
     <Compile Include="Patterns\BuilderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

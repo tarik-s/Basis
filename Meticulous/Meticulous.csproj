@@ -142,7 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Check.cs" />
-    <Compile Include="Collections\Generic\Node.cs" />
+    <Compile Include="Collections\Generic\TreeNode.cs" />
     <Compile Include="EmptyArray.cs" />
     <Compile Include="ExceptionHandler.cs" />
     <Compile Include="ExtensionMethods.cs" />
