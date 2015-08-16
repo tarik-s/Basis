@@ -10,20 +10,20 @@ using Meticulous;
 namespace Meticulous.Collections.Generic
 {
     /// <summary>
-    /// 
+    /// IReadOnlyTreeNode
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <typeparam name="TNode"></typeparam>
-    public interface IReadOnlyTreeNode<T, out TNode> : IReadOnlyList<TNode>
+    /// <typeparam name="T">Type of data</typeparam>
+    /// <typeparam name="TNode">The type of the node.</typeparam>
+    public interface IReadOnlyTreeNode<out T, out TNode> : IReadOnlyList<TNode>
         where TNode : IReadOnlyTreeNode<T, TNode>
     {
         /// <summary>
-        /// 
+        /// Gets the data.
         /// </summary>
         T Data { get; }
 
         /// <summary>
-        /// 
+        /// Gets the parent.
         /// </summary>
         TNode Parent { get; }
     }
@@ -40,16 +40,16 @@ namespace Meticulous.Collections.Generic
         private readonly ITreeNode<T, TNode> _node;
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="ReadOnlyTreeNode{T, TNode}"/> struct.
         /// </summary>
-        /// <param name="node"></param>
+        /// <param name="node">The node.</param>
         public ReadOnlyTreeNode(ITreeNode<T, TNode> node)
         {
             _node = node;
         }
 
         /// <summary>
-        /// 
+        /// Gets the enumerator.
         /// </summary>
         /// <returns></returns>
         public IEnumerator<ReadOnlyTreeNode<T, TNode>> GetEnumerator()
@@ -60,13 +60,17 @@ namespace Meticulous.Collections.Generic
             return new NodeEnumerator(this);
         }
 
+        /// <summary>
+        /// Gets the enumerator.
+        /// </summary>
+        /// <returns></returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
 
         /// <summary>
-        /// 
+        /// Gets the count.
         /// </summary>
         public int Count
         {
@@ -80,9 +84,12 @@ namespace Meticulous.Collections.Generic
         }
 
         /// <summary>
-        /// 
+        /// Gets the <see cref="Meticulous.Collections.Generic.ReadOnlyTreeNode{T,TNode}"/> at the specified index.
         /// </summary>
-        /// <param name="index"></param>
+        /// <value>
+        /// The <see cref="Meticulous.Collections.Generic.ReadOnlyTreeNode{T,TNode}"/>.
+        /// </value>
+        /// <param name="index">The index.</param>
         /// <returns></returns>
         public ReadOnlyTreeNode<T, TNode> this[int index]
         {
@@ -96,7 +103,7 @@ namespace Meticulous.Collections.Generic
         }
 
         /// <summary>
-        /// 
+        /// Gets the data.
         /// </summary>
         public T Data
         {
@@ -110,7 +117,7 @@ namespace Meticulous.Collections.Generic
         }
 
         /// <summary>
-        /// 
+        /// Gets the parent.
         /// </summary>
         public ReadOnlyTreeNode<T, TNode> Parent
         {

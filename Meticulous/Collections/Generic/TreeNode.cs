@@ -13,10 +13,10 @@ namespace Meticulous.Collections.Generic
     public static class TreeNode
     {
         /// <summary>
-        /// 
+        /// Creates a TreeNode root
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="data"></param>
+        /// <param name="data">The data.</param>
         /// <returns></returns>
         public static TreeNode<T> Create<T>(T data)
         {
@@ -25,20 +25,20 @@ namespace Meticulous.Collections.Generic
     }
 
     /// <summary>
-    /// 
+    /// ITreeNode
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <typeparam name="TNode"></typeparam>
+    /// <typeparam name="TNode">The type of the node.</typeparam>
     public interface ITreeNode<T, TNode> : IList<TNode>
         where TNode : ITreeNode<T, TNode>
     {
         /// <summary>
-        /// 
+        /// Gets or sets the data.
         /// </summary>
         T Data { get; set; }
 
         /// <summary>
-        /// 
+        /// Gets the parent.
         /// </summary>
         TNode Parent { get; }
     }
@@ -101,7 +101,7 @@ namespace Meticulous.Collections.Generic
         }
 
         /// <summary>
-        /// 
+        /// Gets the parent.
         /// </summary>
         public TreeNode<T> Parent
         {
@@ -109,7 +109,7 @@ namespace Meticulous.Collections.Generic
         }
 
         /// <summary>
-        /// 
+        /// Creates a readonly representation of the tree node
         /// </summary>
         /// <returns></returns>
         public ReadOnlyTreeNode<T, TreeNode<T>> AsReadOnly()
@@ -169,11 +169,10 @@ namespace Meticulous.Collections.Generic
             item._parent = this;
         }
 
-
         /// <summary>
-        /// 
+        /// Adds a range of items.
         /// </summary>
-        /// <param name="items"></param>
+        /// <param name="items">The items.</param>
         public void AddRange(IEnumerable<T> items)
         {
             Check.ArgumentNotNull(items, "items");

@@ -75,7 +75,7 @@ namespace Meticulous.Collections.Immutable
 
 
         /// <summary>
-        /// 
+        /// Gets the empty tree node.
         /// </summary>
         public static ImmutableTreeNode<T> Empty
         {
@@ -91,7 +91,7 @@ namespace Meticulous.Collections.Immutable
         }
 
         /// <summary>
-        /// 
+        /// Gets the parent.
         /// </summary>
         public ImmutableTreeNode<T> Parent
         {
@@ -99,7 +99,7 @@ namespace Meticulous.Collections.Immutable
         }
 
         /// <summary>
-        /// 
+        /// Gets the enumerator.
         /// </summary>
         /// <returns></returns>
         public IEnumerator<ImmutableTreeNode<T>> GetEnumerator()
@@ -108,7 +108,7 @@ namespace Meticulous.Collections.Immutable
         }
 
         /// <summary>
-        /// 
+        /// Gets the enumerator.
         /// </summary>
         /// <returns></returns>
         IEnumerator IEnumerable.GetEnumerator()
@@ -117,16 +117,16 @@ namespace Meticulous.Collections.Immutable
         }
 
         /// <summary>
-        /// 
+        /// Adds the specified item.
         /// </summary>
-        /// <param name="item"></param>
+        /// <param name="item">The item.</param>
         void ICollection<ImmutableTreeNode<T>>.Add(ImmutableTreeNode<T> item)
         {
             throw new NotSupportedException();
         }
 
         /// <summary>
-        /// 
+        /// Clears this instance.
         /// </summary>
         void ICollection<ImmutableTreeNode<T>>.Clear()
         {
@@ -134,29 +134,29 @@ namespace Meticulous.Collections.Immutable
         }
 
         /// <summary>
-        /// 
+        /// Determines whether [contains] [the specified item].
         /// </summary>
-        /// <param name="item"></param>
+        /// <param name="item">The item.</param>
         /// <returns></returns>
         public bool Contains(ImmutableTreeNode<T> item)
         {
-            throw new NotImplementedException();
+            return IndexOf(item) != -1;
         }
 
         /// <summary>
-        /// 
+        /// Copies to.
         /// </summary>
-        /// <param name="array"></param>
-        /// <param name="arrayIndex"></param>
+        /// <param name="array">The array.</param>
+        /// <param name="arrayIndex">Index of the array.</param>
         public void CopyTo(ImmutableTreeNode<T>[] array, int arrayIndex)
         {
             throw new NotImplementedException();
         }
 
         /// <summary>
-        /// 
+        /// Removes the specified item.
         /// </summary>
-        /// <param name="item"></param>
+        /// <param name="item">The item.</param>
         /// <returns></returns>
         bool ICollection<ImmutableTreeNode<T>>.Remove(ImmutableTreeNode<T> item)
         {
@@ -164,7 +164,7 @@ namespace Meticulous.Collections.Immutable
         }
 
         /// <summary>
-        /// 
+        /// Gets the count.
         /// </summary>
         public int Count
         {
@@ -172,17 +172,20 @@ namespace Meticulous.Collections.Immutable
         }
 
         /// <summary>
-        /// 
+        /// Gets a value indicating whether this instance is read only.
         /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this instance is read only; otherwise, <c>false</c>.
+        /// </value>
         public bool IsReadOnly
         {
             get { return true; }
         }
 
         /// <summary>
-        /// 
+        /// Indexes the of.
         /// </summary>
-        /// <param name="item"></param>
+        /// <param name="item">The item.</param>
         /// <returns></returns>
         public int IndexOf(ImmutableTreeNode<T> item)
         {
@@ -190,28 +193,31 @@ namespace Meticulous.Collections.Immutable
         }
 
         /// <summary>
-        /// 
+        /// Inserts the specified index.
         /// </summary>
-        /// <param name="index"></param>
-        /// <param name="item"></param>
+        /// <param name="index">The index.</param>
+        /// <param name="item">The item.</param>
         void IList<ImmutableTreeNode<T>>.Insert(int index, ImmutableTreeNode<T> item)
         {
             throw new NotSupportedException();
         }
 
         /// <summary>
-        /// 
+        /// Removes at.
         /// </summary>
-        /// <param name="index"></param>
+        /// <param name="index">The index.</param>
         void IList<ImmutableTreeNode<T>>.RemoveAt(int index)
         {
             throw new NotSupportedException();
         }
 
         /// <summary>
-        /// 
+        /// Gets or sets the <see cref="Meticulous.Collections.Immutable.ImmutableTreeNode{T}"/> at the specified index.
         /// </summary>
-        /// <param name="index"></param>
+        /// <value>
+        /// The <see cref="Meticulous.Collections.Immutable.ImmutableTreeNode{T}"/>.
+        /// </value>
+        /// <param name="index">The index.</param>
         /// <returns></returns>
         ImmutableTreeNode<T> IList<ImmutableTreeNode<T>>.this[int index]
         {
@@ -220,9 +226,12 @@ namespace Meticulous.Collections.Immutable
         }
 
         /// <summary>
-        /// 
+        /// Gets the <see cref="Meticulous.Collections.Immutable.ImmutableTreeNode{T}"/> at the specified index.
         /// </summary>
-        /// <param name="index"></param>
+        /// <value>
+        /// The <see cref="Meticulous.Collections.Immutable.ImmutableTreeNode{T}"/>.
+        /// </value>
+        /// <param name="index">The index.</param>
         /// <returns></returns>
         public ImmutableTreeNode<T> this[int index]
         {
@@ -234,8 +243,11 @@ namespace Meticulous.Collections.Immutable
         }
 
         /// <summary>
-        ///
+        /// Gets or sets the data.
         /// </summary>
+        /// <value>
+        /// The data.
+        /// </value>
         T ITreeNode<T, ImmutableTreeNode<T>>.Data
         {
             get { return this.Data; }
