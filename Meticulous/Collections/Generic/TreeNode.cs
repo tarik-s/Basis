@@ -8,27 +8,69 @@ using System.Threading.Tasks;
 namespace Meticulous.Collections.Generic
 {
     /// <summary>
-    /// Readonly node interface 
+    /// 
     /// </summary>
-    public interface IReadOnlyTreeNode<out T> : IReadOnlyList<IReadOnlyTreeNode<T>>
+    public static class TreeNode
     {
         /// <summary>
-        /// Gets the node attributes
+        /// 
         /// </summary>
-        T Data { get; }
+        /// <typeparam name="T"></typeparam>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static TreeNode<T> Create<T>(T data)
+        {
+            return new TreeNode<T>(data);
+        }
     }
 
     /// <summary>
-    /// TreeNode
+    /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TreeNode<T> : IList<TreeNode<T>>
+    /// <typeparam name="TNode"></typeparam>
+    public interface ITreeNode<T, TNode> : IList<TNode>
+        where TNode : ITreeNode<T, TNode>
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        T Data { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        TNode Parent { get; }
+    }
+
+    /// <summary>
+    /// Tree node
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class TreeNode<T> : ITreeNode<T, TreeNode<T>>, IReadOnlyTreeNode<T, TreeNode<T>>
+    {
+        #region Fields
+
         private static readonly List<TreeNode<T>> s_emptyNodes = new List<TreeNode<T>>();
 
         private T _data;
+        private TreeNode<T> _parent;
         private List<TreeNode<T>> _nodes;
 
+        #endregion
+
+        private TreeNode(T data, TreeNode<T> parent)
+        {
+            _data = data;
+            _parent = parent;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TreeNode{T}"/> class.
+        /// </summary>
+        public TreeNode()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TreeNode{T}"/> class.
@@ -37,6 +79,16 @@ namespace Meticulous.Collections.Generic
         public TreeNode(T data)
         {
             _data = data;
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="TreeNode{T}"/> class.
+        /// </summary>
+        /// <param name="data">The data</param>
+        /// <returns></returns>
+        public static TreeNode<T> Create(T data)
+        {
+            return new TreeNode<T>(data);
         }
 
         /// <summary>
@@ -49,16 +101,35 @@ namespace Meticulous.Collections.Generic
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public TreeNode<T> Parent
+        {
+            get { return _parent; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public ReadOnlyTreeNode<T, TreeNode<T>> AsReadOnly()
+        {
+            return new ReadOnlyTreeNode<T, TreeNode<T>>(this);
+        }
+
+        /// <summary>
         /// Adds the child.
         /// </summary>
         /// <param name="data">The data.</param>
         /// <returns></returns>
         public TreeNode<T> AddChild(T data)
         {
-            var child = new TreeNode<T>(data);
+            var child = new TreeNode<T>(data, this);
             Nodes.Add(child);
             return child;
         }
+
+        #region IList
 
         /// <summary>
         /// Returns an enumerator that iterates through the collection.
@@ -92,7 +163,22 @@ namespace Meticulous.Collections.Generic
         /// <exception cref="System.NotImplementedException"></exception>
         public void Add(TreeNode<T> item)
         {
+            CheckNode(item, "item");
+
             Nodes.Add(item);
+            item._parent = this;
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="items"></param>
+        public void AddRange(IEnumerable<T> items)
+        {
+            Check.ArgumentNotNull(items, "items");
+
+            Nodes.AddRange(items.Select(i => new TreeNode<T>(i, this)));
         }
 
         /// <summary>
@@ -101,7 +187,10 @@ namespace Meticulous.Collections.Generic
         public void Clear()
         {
             if (_nodes != null)
+            {
+                _nodes.ForEach(n => n._parent = null);
                 _nodes.Clear();
+            }
         }
 
         /// <summary>
@@ -140,10 +229,16 @@ namespace Meticulous.Collections.Generic
         /// <exception cref="System.NotImplementedException"></exception>
         public bool Remove(TreeNode<T> item)
         {
-            if (_nodes == null)
+            if (_nodes == null || item.Parent != this)
                 return false;
 
-            return _nodes.Remove(item);
+            if (_nodes.Remove(item))
+            {
+                item._parent = null;
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -153,10 +248,7 @@ namespace Meticulous.Collections.Generic
         {
             get
             {
-                if (_nodes == null)
-                    return 0;
-
-                return _nodes.Count;
+                return _nodes == null ? 0 : _nodes.Count;
             }
         }
 
@@ -175,7 +267,6 @@ namespace Meticulous.Collections.Generic
         /// <returns>
         /// The index of <paramref name="item" /> if found in the list; otherwise, -1.
         /// </returns>
-        /// <exception cref="System.NotImplementedException"></exception>
         public int IndexOf(TreeNode<T> item)
         {
             if (_nodes == null)
@@ -189,20 +280,23 @@ namespace Meticulous.Collections.Generic
         /// </summary>
         /// <param name="index">The zero-based index at which <paramref name="item" /> should be inserted.</param>
         /// <param name="item">The object to insert into the <see cref="T:System.Collections.Generic.IList`1" />.</param>
-        /// <exception cref="System.NotImplementedException"></exception>
         public void Insert(int index, TreeNode<T> item)
         {
+            CheckNode(item, "item");
+
             Nodes.Insert(index, item);
+            item._parent = this;
         }
 
         /// <summary>
         /// Removes the <see cref="T:System.Collections.Generic.IList`1" /> item at the specified index.
         /// </summary>
         /// <param name="index">The zero-based index of the item to remove.</param>
-        /// <exception cref="System.NotImplementedException"></exception>
         public void RemoveAt(int index)
         {
+            var node = Nodes[index];
             Nodes.RemoveAt(index);
+            node._parent = null;
         }
 
         /// <summary>
@@ -213,19 +307,37 @@ namespace Meticulous.Collections.Generic
         public TreeNode<T> this[int index]
         {
             get { return Nodes[index]; }
-            set { Nodes[index] = value; }
+            set
+            {
+                CheckNode(value, "value");
+
+                var oldValue = Nodes[index];
+                Nodes[index] = value;
+                value._parent = this;
+                if (oldValue != null)
+                    oldValue._parent = null;
+            }
         }
 
+        #endregion
 
         private List<TreeNode<T>> Nodes
         {
-            get
-            {
-                if (_nodes == null)
-                    _nodes = new List<TreeNode<T>>();
+            get { return _nodes ?? (_nodes = new List<TreeNode<T>>()); }
+        }
 
-                return _nodes;
-            }
+        private void CheckNode(TreeNode<T> node, string nodeName)
+        {
+            Check.ArgumentNotNull(node, nodeName);
+
+            if (node == this)
+                throw new ArgumentException("The item belongs to other tree", "item");
+
+            var itemParent = node.Parent;
+            if (itemParent != null)
+                throw new ArgumentException("The item belongs to other tree", "item");
+
+            Check.OperationValid(itemParent != this, "The tree already contains this node");
         }
     }
     

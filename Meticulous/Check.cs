@@ -94,6 +94,28 @@ namespace Meticulous
         }
 
         /// <summary>
+        /// Check the parameter value is fit in range
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="indexArg"></param>
+        /// <param name="paramName"></param>
+        /// <param name="collection"></param>
+        [ContractArgumentValidator]
+        public static void ArgumentInRange<T>(int indexArg, string paramName, ICollection<T> collection)
+        {
+            ArgumentNotNull(collection, "collection");
+
+            if (indexArg < 0)
+                throw new ArgumentOutOfRangeException(paramName);
+
+            if (indexArg >= collection.Count)
+                throw new ArgumentOutOfRangeException(paramName);
+
+            Contract.EndContractBlock();
+        }
+
+
+        /// <summary>
         /// Theck the parameter value is fit in range
         /// </summary>
         /// <typeparam name="T">The parameter type</typeparam>

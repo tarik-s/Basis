@@ -142,6 +142,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Check.cs" />
+    <Compile Include="Collections\Generic\ReadOnlyTreeNode.cs" />
+    <Compile Include="Collections\Generic\TreeNodeExtensionMethods.cs" />
+    <Compile Include="Collections\Immutable\ImmutableTreeNode.cs" />
     <Compile Include="Collections\Generic\TreeNode.cs" />
     <Compile Include="EmptyArray.cs" />
     <Compile Include="ExceptionHandler.cs" />
