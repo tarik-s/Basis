@@ -146,4 +146,12 @@ namespace Meticulous.Tests.Threading
     }
 
     #endregion
+
+
+    [TestFixture]
+    public class AtomicEnumTests
+    {
+
+    }
+
 }

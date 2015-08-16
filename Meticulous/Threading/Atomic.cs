@@ -87,7 +87,7 @@ namespace Meticulous.Threading
 
         private static readonly IEqualityComparer<T> s_comparer;
 
-        private readonly ReaderWriterLockSlim _lock;
+        private SpinLock _lock;
         private readonly IEqualityComparer<T> _comparer;
         private T _value;
 
@@ -127,8 +127,8 @@ namespace Meticulous.Threading
         {
             Check.ArgumentNotNull(comparer, "comparer");
 
+            _lock = new SpinLock();
             _value = value;
-            _lock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
             _comparer = comparer;
         }
 
@@ -173,26 +173,30 @@ namespace Meticulous.Threading
         {
             get
             {
-                _lock.EnterReadLock();
+                bool lockTaken = false;
                 try
                 {
+                    _lock.Enter(ref lockTaken);
                     return _value;
                 }
                 finally
                 {
-                    _lock.ExitReadLock();
+                    if (lockTaken)
+                        _lock.Exit();
                 }
             }
             set
             {
-                _lock.EnterWriteLock();
+                bool lockTaken = false;
                 try
                 {
+                    _lock.Enter(ref lockTaken);
                     _value = value;
                 }
                 finally
                 {
-                    _lock.ExitWriteLock();
+                    if (lockTaken)
+                        _lock.Exit();
                 }
             }
         }
@@ -206,9 +210,11 @@ namespace Meticulous.Threading
         /// </returns>
         public bool TrySet(T value)
         {
-            _lock.EnterWriteLock();
+            bool lockTaken = false;
             try
             {
+                _lock.Enter(ref lockTaken);
+
                 if (_comparer.Equals(value, _value))
                     return false;
 
@@ -217,7 +223,8 @@ namespace Meticulous.Threading
             }
             finally
             {
-                _lock.ExitWriteLock();
+                if (lockTaken)
+                    _lock.Exit();
             }
         }
 
@@ -230,16 +237,18 @@ namespace Meticulous.Threading
         /// </returns>
         public T Exchange(T value)
         {
-            _lock.EnterWriteLock();
+            bool lockTaken = false;
             try
             {
+                _lock.Enter(ref lockTaken);
                 var oldValue = _value;
                 _value = value;
                 return oldValue;
             }
             finally
             {
-                _lock.ExitWriteLock();
+                if (lockTaken)
+                    _lock.Exit();
             }
         }
 
