@@ -54,14 +54,14 @@ namespace Meticulous.Threading
         /// <returns>Returns the new instance of atomic value</returns>
         public static IAtomic<T> Create<T>(T value)
         {
-            var type = typeof (T);
-            if (type == typeof (bool))
+            var type = typeof(T);
+            if (type == typeof(bool))
                 return (IAtomic<T>)CreateImpl(typeof(AtomicBoolean), value);
 
-            if (type == typeof (int))
-                return (IAtomic<T>) CreateImpl(typeof (AtomicInteger), value);
+            if (type == typeof(int))
+                return (IAtomic<T>)CreateImpl(typeof(AtomicInteger), value);
 
-            return (IAtomic<T>) CreateImpl(typeof (Atomic<T>), value);
+            return (IAtomic<T>)CreateImpl(typeof(Atomic<T>), value);
         }
 
         private static object CreateImpl(Type type, object value)
@@ -71,10 +71,10 @@ namespace Meticulous.Threading
             if (ctor == null)
                 throw new MissingMethodException(type.Name, ".ctor");
 
-            return ctor.Invoke(new []{value});
+            return ctor.Invoke(new[] { value });
         }
     }
-    
+
     #region Atomic<T>
 
     /// <summary>
@@ -115,7 +115,7 @@ namespace Meticulous.Threading
         public Atomic(T value)
             : this(value, s_comparer)
         {
-            
+
         }
 
         /// <summary>
@@ -256,16 +256,18 @@ namespace Meticulous.Threading
     }
 
     #endregion
-    
+
 
     #region AtomicBoolean
 
     /// <summary>
     /// Atomic boolean struct
     /// </summary>
-    public struct AtomicBooleanValue : IAtomic<bool>
+    public struct AtomicBooleanValue : IAtomic<bool>, IEquatable<AtomicBooleanValue>
     {
         private int _value;
+
+        #region Construction
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AtomicBooleanValue"/> struct.
@@ -299,6 +301,65 @@ namespace Meticulous.Threading
         {
             return new AtomicBooleanValue(value);
         }
+
+        #endregion
+
+        #region IEquatable implementation
+
+        /// <summary>
+        /// Determines whether the specified <see cref="AtomicBooleanValue"/> is equal to the current <see cref="AtomicBooleanValue"/>.
+        /// </summary>
+        /// <param name="other">The <see cref="AtomicBooleanValue"/> to compare with the current <see cref="AtomicBooleanValue"/>.</param>
+        /// <returns><c>true</c> if the specified <see cref="AtomicBooleanValue"/> is equal to the current
+        /// <see cref="AtomicBooleanValue"/>; otherwise, <c>false</c>.</returns>
+        public bool Equals(AtomicBooleanValue other)
+        {
+            return this.Value == other.Value;
+        }
+
+        #endregion
+
+        /// <param name="lhs">Lhs.</param>
+        /// <param name="rhs">Rhs.</param>
+        public static bool operator ==(AtomicBooleanValue lhs, AtomicBooleanValue rhs)
+        {
+            return lhs.Equals(rhs);
+        }
+
+        /// <param name="lhs">Lhs.</param>
+        /// <param name="rhs">Rhs.</param>
+        public static bool operator !=(AtomicBooleanValue lhs, AtomicBooleanValue rhs)
+        {
+            return !lhs.Equals(rhs);
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object"/> is equal to the current <see cref="AtomicBooleanValue"/>.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object"/> to compare with the current <see cref="AtomicBooleanValue"/>.</param>
+        /// <returns><c>true</c> if the specified <see cref="System.Object"/> is equal to the current
+        /// <see cref="AtomicBooleanValue"/>; otherwise, <c>false</c>.</returns>
+        public override bool Equals(object obj)
+        {
+            if (!(obj is AtomicBooleanValue))
+                return false;
+
+            var value = (AtomicBooleanValue)obj;
+            return Value == value.Value;
+        }
+
+        /// <summary>
+        /// Serves as a hash function for a <see cref="AtomicBooleanValue"/> object.
+        /// </summary>
+        /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
+        /// hash table.</returns>
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
+        }
+
+
+        #region IAtomic
 
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="AtomicBooleanValue"/> is value.
@@ -336,6 +397,8 @@ namespace Meticulous.Threading
             var result = Exchange(value);
             return result != value;
         }
+
+        #endregion
     }
 
     /// <summary>
@@ -442,7 +505,7 @@ namespace Meticulous.Threading
     /// <summary>
     /// Atomic Integer struct
     /// </summary>
-    public struct AtomicIntegerValue : IAtomic<int>
+    public struct AtomicIntegerValue : IAtomic<int>, IEquatable<AtomicIntegerValue>
     {
         private int _value;
 
@@ -482,6 +545,60 @@ namespace Meticulous.Threading
         }
 
         #endregion
+
+        #region IEquatable implementation
+
+        /// <summary>
+        /// Determines whether the specified <see cref="AtomicIntegerValue"/> is equal to the current <see cref="AtomicIntegerValue"/>.
+        /// </summary>
+        /// <param name="other">The <see cref="AtomicIntegerValue"/> to compare with the current <see cref="AtomicIntegerValue"/>.</param>
+        /// <returns><c>true</c> if the specified <see cref="AtomicIntegerValue"/> is equal to the current
+        /// <see cref="AtomicIntegerValue"/>; otherwise, <c>false</c>.</returns>
+        public bool Equals(AtomicIntegerValue other)
+        {
+            return this.Value == other.Value;
+        }
+
+        #endregion
+
+        /// <param name="lhs">Lhs.</param>
+        /// <param name="rhs">Rhs.</param>
+        public static bool operator ==(AtomicIntegerValue lhs, AtomicIntegerValue rhs)
+        {
+            return lhs.Equals(rhs);
+        }
+
+        /// <param name="lhs">Lhs.</param>
+        /// <param name="rhs">Rhs.</param>
+        public static bool operator !=(AtomicIntegerValue lhs, AtomicIntegerValue rhs)
+        {
+            return !lhs.Equals(rhs);
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object"/> is equal to the current <see cref="AtomicIntegerValue"/>.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object"/> to compare with the current <see cref="AtomicIntegerValue"/>.</param>
+        /// <returns><c>true</c> if the specified <see cref="System.Object"/> is equal to the current
+        /// <see cref="AtomicIntegerValue"/>; otherwise, <c>false</c>.</returns>
+        public override bool Equals(object obj)
+        {
+            if (!(obj is AtomicIntegerValue))
+                return false;
+
+            var value = (AtomicIntegerValue)obj;
+            return Value == value.Value;
+        }
+
+        /// <summary>
+        /// Serves as a hash function for a <see cref="AtomicIntegerValue"/> object.
+        /// </summary>
+        /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
+        /// hash table.</returns>
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
+        }
 
         #region IAtomic
 
@@ -630,8 +747,8 @@ namespace Meticulous.Threading
     /// Atomic reference base struct
     /// </summary>
     /// <typeparam name="T">Type of reference</typeparam>
-    public struct AtomicReferenceValue<T> : IAtomic<T>
-        where T : class 
+    public struct AtomicReferenceValue<T> : IAtomic<T>, IEquatable<AtomicReferenceValue<T>>
+        where T : class
     {
         private T _value;
 
@@ -672,14 +789,70 @@ namespace Meticulous.Threading
 
         #endregion
 
+        #region IEquatable implementation
+
+        /// <summary>
+        /// Determines whether the specified <see cref="AtomicReferenceValue{T}"/> is equal to the
+        /// current <see cref="AtomicReferenceValue{T}"/>.
+        /// </summary>
+        /// <param name="other">The <see cref="AtomicReferenceValue{T}"/> to compare with the current <see cref="AtomicReferenceValue{T}"/>.</param>
+        /// <returns><c>true</c> if the specified <see cref="AtomicReferenceValue{T}"/> is equal to the
+        /// current <see cref="AtomicReferenceValue{T}"/>; otherwise, <c>false</c>.</returns>
+        public bool Equals(AtomicReferenceValue<T> other)
+        {
+            var thisVal = this.Value;
+            if (thisVal == null)
+                return other.Value == null;
+
+            return thisVal.Equals(other.Value);
+        }
+
+        #endregion
+
+        /// <param name="lhs">Lhs.</param>
+        /// <param name="rhs">Rhs.</param>
+        public static bool operator ==(AtomicReferenceValue<T> lhs, AtomicReferenceValue<T> rhs)
+        {
+            return lhs.Equals(rhs);
+        }
+
+        /// <param name="lhs">Lhs.</param>
+        /// <param name="rhs">Rhs.</param>
+        public static bool operator !=(AtomicReferenceValue<T> lhs, AtomicReferenceValue<T> rhs)
+        {
+            return !lhs.Equals(rhs);
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object"/> is equal to the current <see cref="AtomicReferenceValue{T}"/>.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object"/> to compare with the current <see cref="AtomicReferenceValue{T}"/>.</param>
+        /// <returns><c>true</c> if the specified <see cref="System.Object"/> is equal to the current
+        /// <see cref="AtomicReferenceValue{T}"/>; otherwise, <c>false</c>.</returns>
+        public override bool Equals(object obj)
+        {
+            if (!(obj is AtomicReferenceValue<T>))
+                return false;
+
+            var value = (AtomicReferenceValue<T>)obj;
+            return Value == value.Value;
+        }
+
+        /// <summary>
+        /// Serves as a hash function for a <see cref="AtomicReferenceValue{T}"/> object.
+        /// </summary>
+        /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
+        /// hash table.</returns>
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
+        }
+
         #region IAtomic
 
         /// <summary>
         /// Gets or sets the value.
         /// </summary>
-        /// <value>
-        /// The value.
-        /// </value>
         public T Value
         {
             get { return Interlocked.CompareExchange(ref _value, null, null); }
@@ -831,7 +1004,10 @@ namespace Meticulous.Threading
 
         public static bool MakeBool(int value)
         {
-            CheckIntBool(value, "value");
+            #if DEBUG
+            if (value != True && value != False)
+                throw new ArgumentException("Value MUST be 0 or 1", "value");
+            #endif
 
             if (value == True)
                 return true;
@@ -856,14 +1032,5 @@ namespace Meticulous.Threading
         {
             return Interlocked.CompareExchange(ref value, 0, 0);
         }
-
-        [Conditional("DEBUG")]
-        private static void CheckIntBool(int value, string paramName)
-        {
-            if (value != True && value != False)
-                throw new ArgumentException("Argument MUST be 0 or 1", paramName);
-        }
-
-
     }
 }
