@@ -85,10 +85,10 @@ namespace Meticulous.Threading
     {
         #region Fields
 
-        private static readonly IEqualityComparer<T> s_comparer;
+        private static readonly Func<T, T, bool> s_equalizer;
 
         private SpinLock _lock;
-        private readonly IEqualityComparer<T> _comparer;
+        private readonly Func<T, T, bool> _equalizer;
         private T _value;
 
         #endregion
@@ -97,7 +97,8 @@ namespace Meticulous.Threading
 
         static Atomic()
         {
-            s_comparer = EqualityComparer<T>.Default;
+            var comparer = EqualityComparer<T>.Default;
+            s_equalizer = (a, b) => comparer.Equals(a, b);
         }
 
         /// <summary>
@@ -113,7 +114,7 @@ namespace Meticulous.Threading
         /// </summary>
         /// <param name="value">The initial value.</param>
         public Atomic(T value)
-            : this(value, s_comparer)
+            : this(value, s_equalizer)
         {
 
         }
@@ -122,14 +123,14 @@ namespace Meticulous.Threading
         /// Initializes a new instance of the <see cref="Atomic{T}"/> class.
         /// </summary>
         /// <param name="value">The initial value.</param>
-        /// <param name="comparer">The comparer.</param>
-        public Atomic(T value, IEqualityComparer<T> comparer)
+        /// <param name="equalizer">The equalizer.</param>
+        public Atomic(T value, Func<T, T, bool> equalizer)
         {
-            Check.ArgumentNotNull(comparer, "comparer");
+            Check.ArgumentNotNull(equalizer, "comparer");
 
             _lock = new SpinLock();
             _value = value;
-            _comparer = comparer;
+            _equalizer = equalizer;
         }
 
         /// <summary>
@@ -161,14 +162,25 @@ namespace Meticulous.Threading
 
         #endregion
 
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            if (_value == null)
+                return String.Empty;
+
+            return _value.ToString();
+        }
+
         #region IAtomic
 
         /// <summary>
         /// Gets or sets the value.
         /// </summary>
-        /// <value>
-        /// The value.
-        /// </value>
         public T Value
         {
             get
@@ -215,7 +227,7 @@ namespace Meticulous.Threading
             {
                 _lock.Enter(ref lockTaken);
 
-                if (_comparer.Equals(value, _value))
+                if (_equalizer(value, _value))
                     return false;
 
                 _value = value;
@@ -358,6 +370,16 @@ namespace Meticulous.Threading
             return Value.GetHashCode();
         }
 
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
 
         #region IAtomic
 
@@ -455,6 +477,17 @@ namespace Meticulous.Threading
         }
 
         #endregion
+
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return _value.ToString();
+        }
 
         #region IAtomic
 
@@ -600,6 +633,17 @@ namespace Meticulous.Threading
             return Value.GetHashCode();
         }
 
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
+
         #region IAtomic
 
         /// <summary>
@@ -696,6 +740,17 @@ namespace Meticulous.Threading
         }
 
         #endregion
+
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return _value.ToString();
+        }
 
         #region IAtomic
 
@@ -848,6 +903,20 @@ namespace Meticulous.Threading
             return Value.GetHashCode();
         }
 
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            if (_value == null)
+                return String.Empty;
+
+            return _value.ToString();
+        }
+
         #region IAtomic
 
         /// <summary>
@@ -943,6 +1012,17 @@ namespace Meticulous.Threading
         }
 
         #endregion
+
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return _value.ToString();
+        }
 
         #region IAtomic
 

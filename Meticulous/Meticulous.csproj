@@ -149,6 +149,13 @@
     <Compile Include="EmptyArray.cs" />
     <Compile Include="ExceptionHandler.cs" />
     <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="Externals\External.cs" />
+    <Compile Include="Externals\ExternalAttribute.cs" />
+    <Compile Include="Externals\ExternalDriver.cs" />
+    <Compile Include="Externals\ExternalManager.cs" />
+    <Compile Include="Externals\ExternalMemberWrapper.cs" />
+    <Compile Include="Externals\ExternalHelper.cs" />
+    <Compile Include="Externals\IExternalizable.cs" />
     <Compile Include="IO\DirectoryContentsInfo.cs" />
     <Compile Include="IO\ExtensionMethods.cs" />
     <Compile Include="Patterns\Builder.cs" />
