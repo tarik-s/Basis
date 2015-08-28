@@ -9,7 +9,7 @@ namespace Meticulous.Externals
     /// <summary>
     /// External attribute
     /// </summary>
-    public abstract class ExternalAttribute
+    public abstract class ExternalAttribute : Attribute
     {
         private readonly string _name;
 

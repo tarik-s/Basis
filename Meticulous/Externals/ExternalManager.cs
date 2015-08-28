@@ -12,5 +12,18 @@ namespace Meticulous.Externals
     public class ExternalManager
     {
         //private readonly ExternalDriver[] _drivers;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public ExternalManager()
+        {
+            AppDomain.CurrentDomain.AssemblyLoad += HandleCurrentDomainAssemblyLoad;
+        }
+
+        private void HandleCurrentDomainAssemblyLoad(object sender, AssemblyLoadEventArgs args)
+        {
+            
+        }
     }
 }

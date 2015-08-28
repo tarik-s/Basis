@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Meticulous.Externals;
 
 namespace Meticulous.Resources
 {
@@ -11,9 +12,8 @@ namespace Meticulous.Resources
     /// Resource class
     /// </summary>
     /// <typeparam name="T">Type of resource</typeparam>
-    public sealed class Resource<T>
+    public sealed class Resource<T> : External<T>
     {
-        private readonly T _defaultValue;
         private TryFunc<CultureInfo, T> _provider;
 
         /// <summary>
@@ -29,14 +29,15 @@ namespace Meticulous.Resources
         /// </summary>
         /// <param name="defaultValue">The default value.</param>
         public Resource(T defaultValue)
+            : base(defaultValue)
         {
-            _defaultValue = defaultValue;
+            
         }
 
         /// <summary>
         /// Gets the value.
         /// </summary>
-        public T Value
+        public override T Value
         {
             get { return Get(CultureInfo.CurrentCulture); }
         }
@@ -54,15 +55,7 @@ namespace Meticulous.Resources
                 if (_provider(cultureInfo, out result))
                     return result;
             }
-            return _defaultValue;
-        }
-
-        /// <summary>
-        /// Gets the default value.
-        /// </summary>
-        public T DefaultValue
-        {
-            get { return _defaultValue; }
+            return DefaultValue;
         }
 
         internal void SetProvider(TryFunc<CultureInfo, T> provider)
