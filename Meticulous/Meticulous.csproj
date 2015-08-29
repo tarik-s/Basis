@@ -66,6 +66,7 @@
     <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
     <DocumentationFile>..\bin\Debug\Meticulous.XML</DocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -130,6 +131,7 @@
     <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <CodeContractsReferenceAssembly>Build</CodeContractsReferenceAssembly>
     <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -150,9 +152,12 @@
     <Compile Include="ExceptionHandler.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Externals\External.cs" />
-    <Compile Include="Externals\ExternalAttribute.cs" />
+    <Compile Include="Externals\ExternalMemberAttribute.cs" />
     <Compile Include="Externals\ExternalDriver.cs" />
+    <Compile Include="Externals\ExternalGroupAttribute.cs" />
+    <Compile Include="Externals\ExternalGroupInfo.cs" />
     <Compile Include="Externals\ExternalManager.cs" />
+    <Compile Include="Externals\ExternalMemberInfo.cs" />
     <Compile Include="Externals\ExternalMemberWrapper.cs" />
     <Compile Include="Externals\ExternalHelper.cs" />
     <Compile Include="Externals\IExternalizable.cs" />

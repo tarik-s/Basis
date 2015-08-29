@@ -39,6 +39,19 @@ namespace Meticulous.Externals
             get { return _defaultValue; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            var value = Value;
+            if (value == null)
+                return String.Empty;
+
+            return value.ToString();
+        }
+
         #region IExternalizable
 
         object IExternalizable.DefaultValue

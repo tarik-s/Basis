@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Meticulous.Externals;
@@ -11,7 +12,7 @@ namespace Meticulous.Resources
     /// Resource attribute
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Enum)]
-    public sealed class ResourceAttribute : ExternalAttribute
+    public sealed class ResourceAttribute : ExternalMemberAttribute
     {
         private bool? _localizable;
 
@@ -54,6 +55,16 @@ namespace Meticulous.Resources
         internal bool? Localizable
         {
             get { return _localizable; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="memberInfo"></param>
+        /// <returns></returns>
+        protected override ExternalMemberInfo CreateInfoImpl(MemberInfo memberInfo)
+        {
+            throw new NotImplementedException();
         }
     }
 }

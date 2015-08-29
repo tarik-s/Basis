@@ -14,22 +14,36 @@ using Meticulous.IO;
 
 namespace Meticulous.SandBox
 {
-
-
-    class Program
+    internal class Program
     {
-        static int Main(string[] args)
+        private static int Main(string[] args)
         {
+            var result = RunLoop.RunMain(MainImpl);
+            //var q = ExecutionQueue.Create(ExecutionQueueProcessorType.ThreadPool);
 
-
-
-
+            Console.WriteLine("Finshed with code: " + result);
             Console.WriteLine("Press any key...");
             Console.ReadKey();
 
-            Environment.ExitCode = 0;
-            return 0;
+            Environment.ExitCode = result;
+            return result;
 
+        }
+
+        private static async Task TestAsync()
+        {
+            Console.WriteLine("#1: " + Thread.CurrentThread.ManagedThreadId);
+            await Task.Delay(1000);
+            Console.WriteLine("#2: " + Thread.CurrentThread.ManagedThreadId);
+            RunLoop.MainLoop.Stop(123);
+            await Task.Delay(1000);
+            Console.WriteLine("#3: " + Thread.CurrentThread.ManagedThreadId);
+        }
+
+
+        private static void MainImpl()
+        {
+            TestAsync().Wait();
         }
     }
 }

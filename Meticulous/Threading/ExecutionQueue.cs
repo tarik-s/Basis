@@ -27,6 +27,15 @@ namespace Meticulous.Threading
         ThreadPool
     }
 
+    [Serializable]
+    internal enum ExecutionQueueState
+    {
+        Working,
+        Stopping,
+        Stopped,
+        Disposed
+    }
+
     /// <summary>
     /// Represens an execution queue
     /// </summary>
@@ -34,13 +43,11 @@ namespace Meticulous.Threading
     {
         #region Fields
 
-        private volatile State _state;
+        private volatile ExecutionQueueState _state;
         private volatile bool _isAcquired;
         private readonly ManualResetEvent _stopEvent;
         private readonly Queue<ExecutionItem> _items;
         private readonly ExecutionQueueProcessor _processor;
-
-        private readonly Lazy<Scheduler> _scheduler;
 
         #endregion
 
@@ -48,10 +55,9 @@ namespace Meticulous.Threading
 
         internal ExecutionQueue(Func<Action, ExecutionQueueProcessor> processorFactory)
         {
-            _state = State.Working;
+            _state = ExecutionQueueState.Working;
             _stopEvent = new ManualResetEvent(false);
             _items = new Queue<ExecutionItem>();
-            _scheduler = new Lazy<Scheduler>(() => new Scheduler(this));
             _processor = processorFactory(Execute);
         }
 
@@ -170,9 +176,13 @@ namespace Meticulous.Threading
             Check.ArgumentNotNull(action, "action");
             CheckWorking();
 
-            var scheduler = _scheduler.Value;
-            var factory = Task.Factory;
-            return factory.StartNew(action, token, factory.CreationOptions, scheduler);
+            Func<int> func = () =>
+            {
+                action();
+                return 0;
+            };
+
+            return StartTaskImpl(func, token);
         }
 
         /// <summary>
@@ -198,12 +208,46 @@ namespace Meticulous.Threading
             Check.ArgumentNotNull(func, "func");
             CheckWorking();
 
-            var scheduler = _scheduler.Value;
-            var factory = Task<TResult>.Factory;
-            return factory.StartNew(func, token, factory.CreationOptions, scheduler);
+            return StartTaskImpl(func, token);
+        }
+
+        private Task<TResult> StartTaskImpl<TResult>(Func<TResult> func, CancellationToken token)
+        {
+            var tcs = new TaskCompletionSource<TResult>();
+
+            Action action = () =>
+            {
+                if (token.IsCancellationRequested)
+                {
+                    tcs.TrySetCanceled();
+                }
+                else
+                {
+                    var result = func();
+                    tcs.SetResult(result);
+                }
+            };
+
+            var item = new ExecutionItem(ExecutionItemOrigin.Task, action, token)
+            {
+                ExecuteEvenIfCancelled = true,
+                ExceptionHandler = ExceptionHandler.Create(e =>
+                {
+                    tcs.SetException(e);
+                    return true;
+                })
+            };
+
+            Enqueue(item);
+            return tcs.Task;
         }
 
         #endregion
+
+        internal WaitHandle StopHandle
+        {
+            get { return _stopEvent; }
+        }
 
         /// <summary>
         /// Stops this queue.
@@ -215,17 +259,17 @@ namespace Meticulous.Threading
 
             lock (_items)
             {
-                if (_state != State.Working)
+                if (_state != ExecutionQueueState.Working)
                     return false;
 
                 var item = new ExecutionItem(ExecutionItemOrigin.Stop, () =>
                 {
-                    _state = State.Stopped;
+                    _state = ExecutionQueueState.Stopped;
                     _stopEvent.Set();
                     _processor.Stop();
                 });
                 Enqueue(item);
-                _state = State.Stopping;
+                _state = ExecutionQueueState.Stopping;
             }
 
             return true;
@@ -258,13 +302,13 @@ namespace Meticulous.Threading
         /// </summary>
         public void Dispose()
         {
-            if (_state == State.Disposed)
+            if (_state == ExecutionQueueState.Disposed)
                 return;
 
             Stop();
             Wait();
 
-            _state = State.Disposed;
+            _state = ExecutionQueueState.Disposed;
             _stopEvent.Dispose();
         }
 
@@ -329,14 +373,18 @@ namespace Meticulous.Threading
         {
             try
             {
-                if (!item.Token.IsCancellationRequested)
+                if (item.ExecuteEvenIfCancelled || !item.Token.IsCancellationRequested)
                     item.Action();
             }
             catch (Exception e)
             {
                 item.Exception = e;
-                if (item.Origin == ExecutionItemOrigin.Post)
-                    RaiseUnhandledException(e);
+                var eh = item.ExceptionHandler;
+                if (eh == null || !eh.HandleException(e, item))
+                {
+                    if (item.Origin == ExecutionItemOrigin.Post)
+                        RaiseUnhandledException(e);
+                }
             }
             finally
             {
@@ -354,26 +402,17 @@ namespace Meticulous.Threading
 
         private void CheckNotDisposed()
         {
-            if (_state == State.Disposed)
+            if (_state == ExecutionQueueState.Disposed)
                 throw new ObjectDisposedException(GetType().Name);
         }
 
         private void CheckWorking()
         {
             CheckNotDisposed();
-            Check.OperationValid(_state == State.Working, "Queue is already stopp(ing)/(ed)");
+            Check.OperationValid(_state == ExecutionQueueState.Working, "Queue is already stopp(ing)/(ed)");
         }
 
         #region Private classes
-
-        [Serializable]
-        private enum State
-        {
-            Working,
-            Stopping,
-            Stopped,
-            Disposed
-        }
 
         [Serializable]
         private enum ExecutionItemOrigin
@@ -389,6 +428,7 @@ namespace Meticulous.Threading
             private readonly Action _action;
             private readonly CancellationToken _token;
             private readonly ExecutionItemOrigin _origin;
+            
             public ExecutionItem(ExecutionItemOrigin origin, Action action)
                 : this(origin, action, CancellationToken.None)
             {
@@ -416,48 +456,13 @@ namespace Meticulous.Threading
                 get { return _token; }
             }
 
+            public ExceptionHandler ExceptionHandler { get; set; }
+
+            public bool ExecuteEvenIfCancelled { get; set; }
+
             public Exception Exception { get; set; }
 
             public ManualResetEvent CompletionEvent { get; set; }
-
-        }
-
-        private sealed class Scheduler : TaskScheduler
-        {
-            private readonly ExecutionQueue _queue;
-
-            public Scheduler(ExecutionQueue queue)
-            {
-                Check.ArgumentNotNull(queue, "queue");
-
-                _queue = queue;
-            }
-
-            public override int MaximumConcurrencyLevel
-            {
-                get { return 1; }
-            }
-
-            protected override void QueueTask(Task task)
-            {
-                var item = new ExecutionItem(ExecutionItemOrigin.Task, () => ExecuteTask(task));
-                _queue.Enqueue(item);
-            }
-
-            private void ExecuteTask(Task task)
-            {
-                base.TryExecuteTask(task);
-            }
-
-            protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
-            {
-                return false;
-            }
-
-            protected override IEnumerable<Task> GetScheduledTasks()
-            {
-                throw new NotImplementedException();
-            }
         }
 
         #endregion

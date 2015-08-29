@@ -23,7 +23,7 @@ namespace Meticulous.Externals
 
         private void HandleCurrentDomainAssemblyLoad(object sender, AssemblyLoadEventArgs args)
         {
-            
+
         }
     }
 }

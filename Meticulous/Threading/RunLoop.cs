@@ -18,12 +18,9 @@ namespace Meticulous.Threading
         private static RunLoop _mainLoop;
 
         private readonly int _threadId;
-
         private readonly AutoResetEvent _signal;
         private ExecutionQueueProcessorImpl _processor;
         private readonly ExecutionQueue _queue;
-
-        private volatile bool _isStopped;
         private int _exitCode;
 
         private RunLoop()
@@ -64,8 +61,7 @@ namespace Meticulous.Threading
         public void Stop(int exitCode)
         {
             _exitCode = exitCode;
-            _isStopped = true;
-            _signal.Set();
+            _queue.Stop();
         }
 
         /// <summary>
@@ -82,6 +78,7 @@ namespace Meticulous.Threading
         public void Dispose()
         {
             _queue.Dispose();
+            _signal.Dispose();
         }
 
         /// <summary>
@@ -136,22 +133,22 @@ namespace Meticulous.Threading
             {
                 _currentLoop = oldLoop;
                 SynchronizationContext.SetSynchronizationContext(oldCtx);
+                loop.Dispose();
             }
         }
 
         private int RunImpl()
         {
-            while (_signal.WaitOne())
+            var handles = new WaitHandle[] {_queue.StopHandle, _signal};
+            for (;;)
             {
-                if (_isStopped)
+                var index = WaitHandle.WaitAny(handles);
+                if (index != 1)
                     break;
-
                 _processor.Pump();
             }
             return _exitCode;
         }
-
-
 
         private sealed class ExecutionQueueProcessorImpl : ExecutionQueueProcessor
         {

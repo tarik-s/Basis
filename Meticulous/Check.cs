@@ -140,6 +140,23 @@ namespace Meticulous
 
         #endregion
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <param name="paramName"></param>
+        /// <param name="message"></param>
+        [ContractArgumentValidator]
+        public static void ArgumentNotEmpty(string arg, string paramName, string message = null)
+        {
+            ArgumentNotNull(arg, paramName, message);
+
+            if (String.IsNullOrEmpty(arg))
+                throw new ArgumentException(message ?? "String is empty", paramName);
+
+            Contract.EndContractBlock();
+        }
+
         #region OperationValid
 
         /// <summary>
