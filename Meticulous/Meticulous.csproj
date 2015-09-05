@@ -152,6 +152,7 @@
     <Compile Include="ExceptionHandler.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Externals\External.cs" />
+    <Compile Include="Externals\ExternalGroupInfoBuilder.cs" />
     <Compile Include="Externals\ExternalMemberAttribute.cs" />
     <Compile Include="Externals\ExternalDriver.cs" />
     <Compile Include="Externals\ExternalGroupAttribute.cs" />

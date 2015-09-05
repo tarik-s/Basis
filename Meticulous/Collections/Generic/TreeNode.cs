@@ -330,11 +330,11 @@ namespace Meticulous.Collections.Generic
             Check.ArgumentNotNull(node, nodeName);
 
             if (node == this)
-                throw new ArgumentException("The item belongs to other tree", "item");
+                throw new ArgumentException("The item belongs to other tree", nodeName);
 
             var itemParent = node.Parent;
             if (itemParent != null)
-                throw new ArgumentException("The item belongs to other tree", "item");
+                throw new ArgumentException("The item belongs to other tree", nodeName);
 
             Check.OperationValid(itemParent != this, "The tree already contains this node");
         }

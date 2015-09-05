@@ -9,23 +9,16 @@ namespace Meticulous.Externals
     /// <summary>
     /// 
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class ExternalGroupAttribute : Attribute
     {
         private readonly string _name;
 
-        /// <summary>
-        /// 
-        /// </summary>
         public ExternalGroupAttribute()
         {
-            _name = String.Empty;
+            _name = String.Empty; 
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="name"></param>
         public ExternalGroupAttribute(string name)
         {
             Check.ArgumentNotEmpty(name, "name");
@@ -33,20 +26,14 @@ namespace Meticulous.Externals
             _name = name;
         }
         
-        /// <summary>
-        /// 
-        /// </summary>
         public string Name
         {
             get { return _name; }
         }
 
-        protected internal virtual ExternalGroupInfo CreateInfo(Type classType)
+        protected internal virtual ExternalGroupInfoBuilder CreateGroupInfoBuilder(Type classType)
         {
-            Check.ArgumentNotNull(classType, "classType");
-            
-
-            return new ExternalGroupInfo(_name);
+            return new ExternalGroupInfoBuilder(_name);
         }
     }
 }

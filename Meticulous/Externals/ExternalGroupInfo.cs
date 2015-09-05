@@ -12,17 +12,24 @@ namespace Meticulous.Externals
     public class ExternalGroupInfo
     {
         private readonly string _name;
+        private readonly ExternalGroupInfo[] _childGroups;
 
-        public ExternalGroupInfo(string name)
+        public ExternalGroupInfo(ExternalGroupInfoBuilder builder)
         {
-            Check.ArgumentNotEmpty(name, "name", "Group name cannot be empty");
+            Check.ArgumentNotNull(builder, "builder");
 
-            _name = name;
+            _name = builder.Name;
+            _childGroups = builder.GetChildBuilders().Select(b => b.Build()).ToArray();
         }
 
         public string Name
         {
             get { return _name; }
+        }
+
+        public IReadOnlyList<ExternalGroupInfo> ChildGroups
+        {
+            get { return _childGroups; }
         }
     }
 
