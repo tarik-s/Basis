@@ -13,8 +13,8 @@ namespace Meticulous
     {
         #region Fields
 
-        private static readonly ExceptionHandler _alwaysHandling = new DummyHandler(true);
-        private static readonly ExceptionHandler _neverHandling = new DummyHandler(false);
+        private static readonly ExceptionHandler s_alwaysHandling = new DummyHandler(true);
+        private static readonly ExceptionHandler s_neverHandling = new DummyHandler(false);
 
         #endregion
         
@@ -23,7 +23,7 @@ namespace Meticulous
         /// </summary>
         public static ExceptionHandler AlwaysHandling
         {
-            get { return _alwaysHandling; }
+            get { return s_alwaysHandling; }
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace Meticulous
         /// </summary>
         public static ExceptionHandler NeverHandling
         {
-            get { return _neverHandling; }
+            get { return s_neverHandling; }
         }
 
         /// <summary>

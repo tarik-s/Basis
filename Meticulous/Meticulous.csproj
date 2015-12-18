@@ -135,6 +135,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Collections.Immutable, Version=1.1.36.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Collections.Immutable.1.1.36\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -164,15 +168,26 @@
     <Compile Include="Externals\IExternalizable.cs" />
     <Compile Include="IO\DirectoryContentsInfo.cs" />
     <Compile Include="IO\ExtensionMethods.cs" />
+    <Compile Include="Meta\MetaClass.cs" />
+    <Compile Include="Meta\MetaExtensions.cs" />
+    <Compile Include="Meta\MetaField.cs" />
+    <Compile Include="Meta\MetaMethod.cs" />
+    <Compile Include="Meta\MetaModule.cs" />
+    <Compile Include="Meta\MetaObject.cs" />
+    <Compile Include="Meta\MetaTypeVisitor.cs" />
     <Compile Include="Patterns\Builder.cs" />
     <Compile Include="Patterns\Composite.cs" />
+    <Compile Include="Progress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Threading\Atomic.cs" />
     <Compile Include="Threading\ExecutionQueue.cs" />
+    <Compile Include="Threading\ExtensionMethods.cs" />
     <Compile Include="Threading\RunLoop.cs" />
     <Compile Include="TryFunc.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
