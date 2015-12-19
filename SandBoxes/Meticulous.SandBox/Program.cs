@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
@@ -78,55 +79,60 @@ namespace Meticulous.SandBox
 
     internal class Program
     {
-        static Func<object, string> CreateFastConverter()
-        {
-            var mi = typeof(Base).GetMethod("MakeString");
-
-            var objArg = Expression.Parameter(typeof(Object), "obj");
+        private static ImmutableArray<int> test = ImmutableArray<int>.Empty;
 
 
-            var arg = Expression.Convert(objArg, typeof(Base));
-            //var arg = Expression.TypeAs(objArg, typeof(Base));
-            var callExpr = Expression.Call(mi, arg);
+        //static Func<object, string> CreateFastConverter()
+        //{
+        //    var mi = typeof(Base).GetMethod("MakeString");
+
+        //    var objArg = Expression.Parameter(typeof(Object), "obj");
+
+
+        //    var arg = Expression.Convert(objArg, typeof(Base));
+        //    //var arg = Expression.TypeAs(objArg, typeof(Base));
+        //    var callExpr = Expression.Call(mi, arg);
                         
-            var lambdaExpr = Expression.Lambda<Func<object, string>>(callExpr, objArg);
+        //    var lambdaExpr = Expression.Lambda<Func<object, string>>(callExpr, objArg);
 
-            Console.WriteLine(lambdaExpr);
+        //    Console.WriteLine(lambdaExpr);
 
-            var lambda = lambdaExpr.Compile();
-            return lambda;
-        }
+        //    var lambda = lambdaExpr.Compile();
+        //    return lambda;
+        //}
 
-        static Func<object, string> CreateDirectConverter()
-        {
-            return obj => Base.MakeString((Base)obj);
-        }
-
-
-        static Func<object, string> CreateSlowConverter()
-        {
-            var mi = typeof(Base).GetMethod("MakeString");
-
-            return b => (string) mi.Invoke(null, new object[] { b });
-        }
-
-        private static TimeSpan TestConverter(Func<Base, string> converter)
-        {
-            var b = new Base();
-            var sw = Stopwatch.StartNew();
+        //static Func<object, string> CreateDirectConverter()
+        //{
+        //    return obj => Base.MakeString((Base)obj);
+        //}
 
 
-            for (int i = 0; i < 10000000; ++i)
-            {
-                converter(b);
-            }
+        //static Func<object, string> CreateSlowConverter()
+        //{
+        //    var mi = typeof(Base).GetMethod("MakeString");
 
-            sw.Stop();
-            return sw.Elapsed;
-        }
+        //    return b => (string) mi.Invoke(null, new object[] { b });
+        //}
+
+        //private static TimeSpan TestConverter(Func<Base, string> converter)
+        //{
+        //    var b = new Base();
+        //    var sw = Stopwatch.StartNew();
+
+
+        //    for (int i = 0; i < 10000000; ++i)
+        //    {
+        //        converter(b);
+        //    }
+
+        //    sw.Stop();
+        //    return sw.Elapsed;
+        //}
 
         private static int Main(string[] args)
         {
+            var l = test.Length;
+
             var baseModuleBuilder = new MetaModuleBuilder("BaseModule");
 
             var classBuilder = baseModuleBuilder.AddClass("JsObject");
@@ -171,17 +177,17 @@ namespace Meticulous.SandBox
 
             Console.Write(tree);
 
-            var slowCvt = CreateSlowConverter();
-            var fastCvt = CreateFastConverter();
-            var directCvt = CreateDirectConverter();
+            //var slowCvt = CreateSlowConverter();
+            //var fastCvt = CreateFastConverter();
+            //var directCvt = CreateDirectConverter();
 
-            var slowTest = TestConverter(slowCvt);
-            var fastTest = TestConverter(fastCvt);
-            var directTest = TestConverter(directCvt);
+            //var slowTest = TestConverter(slowCvt);
+            //var fastTest = TestConverter(fastCvt);
+            //var directTest = TestConverter(directCvt);
 
-            Console.WriteLine("Slow  : " + slowTest.Ticks);
-            Console.WriteLine("Fast  : " + fastTest.Ticks);
-            Console.WriteLine("Direct: " + directTest.Ticks);
+            //Console.WriteLine("Slow  : " + slowTest.Ticks);
+            //Console.WriteLine("Fast  : " + fastTest.Ticks);
+            //Console.WriteLine("Direct: " + directTest.Ticks);
 
             Console.ReadKey();
             return 1;

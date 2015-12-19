@@ -24,10 +24,10 @@ namespace Meticulous.Meta
         private readonly string _name;
         private readonly MetaType _type;
 
-        internal MetaObject(MetaType type, MetaObjectBuilder builder, MetaObjectBuilderContext context)
+        internal MetaObject(MetaType type, MetaObjectBuilder builder)
             : this(type, builder.Name)
         {
-            context.Add(this);
+            
         }
 
         protected MetaObject(MetaType type, string name)
@@ -82,6 +82,14 @@ namespace Meticulous.Meta
             _classes = new List<MetaClass>();
         }
 
+        public IDisposable CreateScope<TObject>(TObject obj)
+            where TObject : MetaObject
+        {
+            Check.ArgumentNotNull(obj, "obj");
+
+            return new Scope<TObject>(this, obj);
+        }
+
         public long Id
         {
             get { return _id; }
@@ -116,7 +124,7 @@ namespace Meticulous.Meta
             }
         }
 
-        public void Add(MetaObject obj)
+        private void Add(MetaObject obj)
         {
             switch (obj.Type)
             {
@@ -137,7 +145,7 @@ namespace Meticulous.Meta
             }
         }
 
-        public void Remove(MetaObject obj)
+        private void Remove(MetaObject obj)
         {
             const string msg = "Operation called in the wrong order";
             switch (obj.Type)
@@ -163,6 +171,28 @@ namespace Meticulous.Meta
                     throw new ArgumentOutOfRangeException();
             }
         }
+
+
+        private class Scope<TObject> : IDisposable
+            where TObject: MetaObject
+        {
+            private readonly MetaObjectBuilderContext _ctx;
+            private readonly TObject _obj;
+
+            public Scope(MetaObjectBuilderContext ctx, TObject obj)
+            {
+                _obj = obj;
+                _ctx = ctx;
+
+                _ctx.Add(obj);
+            }
+
+            public void Dispose()
+            {
+                _ctx.Remove(_obj);
+            }
+        }
+
     }
 
 

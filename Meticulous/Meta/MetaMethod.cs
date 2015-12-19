@@ -9,10 +9,12 @@ namespace Meticulous.Meta
     public class MetaMethod : MetaObject
     {
         internal MetaMethod(MetaMethodBuilder builder, MetaObjectBuilderContext context)
-            : base(MetaType.Method, builder, context)
+            : base(MetaType.Method, builder)
         {
-
-            context.Remove(this);
+            using (context.CreateScope(this))
+            {
+                
+            }
         }
 
         public override void Accept<TContext>(MetaObjectVisitor<TContext> metaObjectVisitor, TContext context)

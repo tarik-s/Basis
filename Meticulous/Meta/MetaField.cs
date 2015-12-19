@@ -9,10 +9,11 @@ namespace Meticulous.Meta
     public class MetaField : MetaObject
     {
         internal MetaField(MetaFieldBuilder builder, MetaObjectBuilderContext context)
-            : base(MetaType.Field, builder, context)
+            : base(MetaType.Field, builder)
         {
-
-            context.Remove(this);
+            using (context.CreateScope(this))
+            {
+            }
         }
 
         public override void Accept<TContext>(MetaObjectVisitor<TContext> metaObjectVisitor, TContext context)

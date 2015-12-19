@@ -17,17 +17,18 @@ namespace Meticulous.Meta
         private readonly ImmutableArray<MetaField> _fields;
 
         internal MetaClass(MetaClassBuilder builder, MetaObjectBuilderContext context)
-            : base(MetaType.Class, builder, context)
+            : base(MetaType.Class, builder)
         {
-            _module = context.Module;
-            _baseClass = context.BaseClass;
+            using (context.CreateScope(this))
+            {
+                _module = context.Module;
+                _baseClass = context.BaseClass;
 
-            _derivedClasses = builder.BuildDerivedClasses(context);
+                _derivedClasses = builder.BuildDerivedClasses(context);
 
-            _fields = builder.BuildFields(context);
-            _methods = builder.BuildMethods(context);
-
-            context.Remove(this);
+                _fields = builder.BuildFields(context);
+                _methods = builder.BuildMethods(context);
+            }
         }
 
         public MetaModule Module
@@ -129,16 +130,12 @@ namespace Meticulous.Meta
 
         internal MetaClass Build(MetaObjectBuilderContext context)
         {
-            if (_baseClass != null)
-                context.Add(_baseClass);
-            try
+            if (_baseClass == null)
+                return new MetaClass(this, context);
+
+            using (context.CreateScope(_baseClass))
             {
                 return new MetaClass(this, context);
-            }
-            finally
-            {
-                if (_baseClass != null)
-                    context.Remove(_baseClass);
             }
         }
     }

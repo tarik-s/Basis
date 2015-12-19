@@ -15,15 +15,23 @@ namespace Meticulous.Meta
         private readonly ImmutableArray<MetaModule> _references;
 
         internal MetaModule(MetaModuleBuilder builder, MetaObjectBuilderContext context)
-            : base(MetaType.Module, builder, context)
+            : base(MetaType.Module, builder)
         {
-            _references = builder.GetReferences();
+            using (context.CreateScope(this))
+            {
+                _references = builder.GetReferences();
+                _rootClasses = builder.BuildClasses(context);
+                _classes = _rootClasses;
+            }
+        }
 
-            _rootClasses = builder.BuildClasses(context);
+        public MetaModule(string name, ImmutableArray<MetaModule> references, Func<MetaModule, ImmutableArray<MetaClass>> rootClassesFactory)
+            : base(MetaType.Module, name)
+        {
+            _references = references.IsDefault ? ImmutableArray<MetaModule>.Empty : references;
 
+            _rootClasses = rootClassesFactory(this);
             _classes = _rootClasses;
-
-            context.Remove(this);
         }
 
         public ImmutableArray<MetaClass> Classes
