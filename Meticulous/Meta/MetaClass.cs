@@ -11,20 +11,28 @@ namespace Meticulous.Meta
     {
         private readonly MetaModule _module;
         private readonly MetaClass _baseClass;
+
         private readonly ImmutableArray<MetaClass> _derivedClasses;
         private readonly ImmutableArray<MetaMethod> _methods;
         private readonly ImmutableArray<MetaField> _fields;
 
-        internal MetaClass(MetaClassBuilder builder, MetaObjectBuilderContext context, MetaModule module, MetaClass baseClass)
-            : base(builder, context)
+        internal MetaClass(MetaClassBuilder builder, MetaObjectBuilderContext context)
+            : base(MetaType.Class, builder, context)
         {
-            _module = module;
+            _module = context.Module;
+            _baseClass = context.BaseClass;
 
-            _baseClass = baseClass;
-            _fields = builder.BuildFields(this);
-            _methods = builder.BuildMethods(this);
+            _derivedClasses = builder.BuildDerivedClasses(context);
 
-            _derivedClasses = builder.BuildDerivedClasses(context, module, this);
+            _fields = builder.BuildFields(context);
+            _methods = builder.BuildMethods(context);
+
+            context.Remove(this);
+        }
+
+        public MetaModule Module
+        {
+            get { return _module; }
         }
 
         public MetaClass BaseClass
@@ -47,14 +55,9 @@ namespace Meticulous.Meta
             get { return _fields; }
         }
 
-        public MetaModule Module
+        public override void Accept<TContext>(MetaObjectVisitor<TContext> metaObjectVisitor, TContext context)
         {
-            get { return _module; }
-        }
-
-        public override void Accept<TContext>(MetaTypeVisitor<TContext> metaTypeVisitor, TContext context)
-        {
-            metaTypeVisitor.VisitClass(this, context);
+            metaObjectVisitor.VisitClass(this, context);
         }
     }
 
@@ -109,24 +112,34 @@ namespace Meticulous.Meta
             return fieldBuilder;
         }
 
-        internal ImmutableArray<MetaField> BuildFields(MetaClass thisClass)
+        internal ImmutableArray<MetaField> BuildFields(MetaObjectBuilderContext context)
         {
             return ImmutableArray<MetaField>.Empty;
         }
 
-        internal ImmutableArray<MetaMethod> BuildMethods(MetaClass thisClass)
+        internal ImmutableArray<MetaMethod> BuildMethods(MetaObjectBuilderContext context)
         {
             return ImmutableArray<MetaMethod>.Empty;
         }
 
-        internal ImmutableArray<MetaClass> BuildDerivedClasses(MetaObjectBuilderContext context, MetaModule module, MetaClass thisClass)
+        internal ImmutableArray<MetaClass> BuildDerivedClasses(MetaObjectBuilderContext context)
         {
-            return _derivedBuilders.Select(b => new MetaClass(b, context, module, thisClass)).ToImmutableArray();
+            return _derivedBuilders.Select(b => new MetaClass(b, context)).ToImmutableArray();
         }
 
-        internal MetaClass Build(MetaObjectBuilderContext context, MetaModule module)
+        internal MetaClass Build(MetaObjectBuilderContext context)
         {
-            return new MetaClass(this, context, module, _baseClass);
+            if (_baseClass != null)
+                context.Add(_baseClass);
+            try
+            {
+                return new MetaClass(this, context);
+            }
+            finally
+            {
+                if (_baseClass != null)
+                    context.Remove(_baseClass);
+            }
         }
     }
 

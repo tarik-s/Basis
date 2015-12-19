@@ -174,7 +174,7 @@
     <Compile Include="Meta\MetaMethod.cs" />
     <Compile Include="Meta\MetaModule.cs" />
     <Compile Include="Meta\MetaObject.cs" />
-    <Compile Include="Meta\MetaTypeVisitor.cs" />
+    <Compile Include="Meta\MetaObjectVisitor.cs" />
     <Compile Include="Patterns\Builder.cs" />
     <Compile Include="Patterns\Composite.cs" />
     <Compile Include="Progress.cs" />

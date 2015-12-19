@@ -10,15 +10,20 @@ namespace Meticulous.Meta
 {
     public class MetaModule : MetaObject
     {
+        private readonly ImmutableArray<MetaClass> _rootClasses;
         private readonly ImmutableArray<MetaClass> _classes;
         private readonly ImmutableArray<MetaModule> _references;
 
         internal MetaModule(MetaModuleBuilder builder, MetaObjectBuilderContext context)
-            : base(builder, context)
+            : base(MetaType.Module, builder, context)
         {
             _references = builder.GetReferences();
 
-            _classes = builder.BuildClasses(context, this);
+            _rootClasses = builder.BuildClasses(context);
+
+            _classes = _rootClasses;
+
+            context.Remove(this);
         }
 
         public ImmutableArray<MetaClass> Classes
@@ -26,14 +31,19 @@ namespace Meticulous.Meta
             get { return _classes; }
         }
 
+        public ImmutableArray<MetaClass> RootClasses
+        {
+            get { return _rootClasses; }
+        }
+
         public ImmutableArray<MetaModule> References
         {
             get { return _references; }
         }
 
-        public override void Accept<TContext>(MetaTypeVisitor<TContext> metaTypeVisitor, TContext context)
+        public override void Accept<TContext>(MetaObjectVisitor<TContext> metaObjectVisitor, TContext context)
         {
-            metaTypeVisitor.VisitModule(this, context);
+            metaObjectVisitor.VisitModule(this, context);
         }
     }
 
@@ -64,18 +74,18 @@ namespace Meticulous.Meta
             return builder;
         }
 
-        public MetaClassBuilder AddClass(string name, MetaClass baseMetaClass)
+        public MetaClassBuilder AddClass(string name, MetaClass baseClass)
         {
-            var builder = new MetaClassBuilder(name, baseMetaClass);
+            var builder = new MetaClassBuilder(name, baseClass);
 
             _classBuilders.Add(builder);
 
             return builder;
         }
 
-        internal ImmutableArray<MetaClass> BuildClasses(MetaObjectBuilderContext context, MetaModule module)
+        internal ImmutableArray<MetaClass> BuildClasses(MetaObjectBuilderContext context)
         {
-            return _classBuilders.Select(cb => cb.Build(context, module)).ToImmutableArray();
+            return _classBuilders.Select(cb => cb.Build(context)).ToImmutableArray();
         }
 
         #region References

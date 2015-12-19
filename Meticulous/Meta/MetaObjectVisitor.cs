@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Meticulous.Meta
 {
-    public abstract class MetaTypeVisitor<TContext>
+    public abstract class MetaObjectVisitor<TContext>
     {
         public abstract void VisitClass(MetaClass metaClass, TContext context);
         public abstract void VisitModule(MetaModule metaModule, TContext context);
@@ -14,8 +14,8 @@ namespace Meticulous.Meta
         public abstract void VisitField(MetaField metaMethod, TContext context);
     }
 
-    public interface IMetaTypeVisitable
+    public interface IMetaObjectVisitable
     {
-        void Accept<TContext>(MetaTypeVisitor<TContext> metaTypeVisitor, TContext context);
+        void Accept<TContext>(MetaObjectVisitor<TContext> metaObjectVisitor, TContext context);
     }
 }

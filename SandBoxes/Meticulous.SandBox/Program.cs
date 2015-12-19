@@ -26,7 +26,7 @@ namespace Meticulous.SandBox
     }
 
 
-    internal class MetaTypePrinter : MetaTypeVisitor<StringBuilder>
+    internal class MetaObjectPrinter : MetaObjectVisitor<StringBuilder>
     {
         public string Visit(MetaModule module)
         {
@@ -55,11 +55,11 @@ namespace Meticulous.SandBox
         public override void VisitModule(MetaModule metaModule, StringBuilder context)
         {
             context.AppendLine(metaModule.Name);
-            foreach (IMetaTypeVisitable metaClass in metaModule.Classes)
+            foreach (IMetaObjectVisitable metaClass in metaModule.Classes)
             {
                 metaClass.Accept(this, context);
             }
-            foreach (IMetaTypeVisitable module in metaModule.References)
+            foreach (IMetaObjectVisitable module in metaModule.References)
             {
                 module.Accept(this, context);
             }
@@ -165,7 +165,7 @@ namespace Meticulous.SandBox
 
             var module = moduleBuilder.Build();
 
-            var printer = new MetaTypePrinter();
+            var printer = new MetaObjectPrinter();
 
             var tree = printer.Visit(module);
 

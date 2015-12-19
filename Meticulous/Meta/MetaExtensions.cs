@@ -13,7 +13,10 @@ namespace Meticulous.Meta
             Check.This(@this);
 
             var builder = @this.AddDerivedClass(name);
-            handler(builder);
+
+            if (handler != null)
+                handler(builder);
+
             return @this;
         }
 
@@ -22,7 +25,10 @@ namespace Meticulous.Meta
             Check.This(@this);
 
             var builder = @this.AddField(name);
-            handler(builder);
+
+            if (handler != null)
+                handler(builder);
+
             return @this;
         }
     }

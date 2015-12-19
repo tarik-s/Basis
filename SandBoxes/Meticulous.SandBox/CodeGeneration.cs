@@ -13,19 +13,4 @@ using Meticulous.Patterns;
 namespace Meticulous.SandBox
 {
 
-
-    #region MetaObject
-
-
-    #endregion
-
-    #region MetaModule
-
-
-    #endregion
-
-    #region MetaClass
-
-
-    #endregion
 }
