@@ -15,7 +15,7 @@ namespace Meticulous.Meta
         private readonly ImmutableArray<MetaModule> _references;
 
         internal MetaModule(MetaModuleBuilder builder, MetaObjectBuilderContext context)
-            : base(MetaType.Module, builder)
+            : base(MetaType.Module, builder.Name)
         {
             using (context.CreateScope(this))
             {
@@ -23,15 +23,6 @@ namespace Meticulous.Meta
                 _rootClasses = builder.BuildClasses(context);
                 _classes = _rootClasses;
             }
-        }
-
-        public MetaModule(string name, ImmutableArray<MetaModule> references, Func<MetaModule, ImmutableArray<MetaClass>> rootClassesFactory)
-            : base(MetaType.Module, name)
-        {
-            _references = references.IsDefault ? ImmutableArray<MetaModule>.Empty : references;
-
-            _rootClasses = rootClassesFactory(this);
-            _classes = _rootClasses;
         }
 
         public ImmutableArray<MetaClass> Classes
@@ -55,7 +46,7 @@ namespace Meticulous.Meta
         }
     }
 
-    public class MetaModuleBuilder : MetaObjectBuilder, IBuilder<MetaModule>
+    public class MetaModuleBuilder : MetaObjectBuilder<MetaModule>
     {
         private readonly List<MetaModule> _references;
         private readonly List<MetaClassBuilder> _classBuilders;
@@ -65,12 +56,6 @@ namespace Meticulous.Meta
         {
             _classBuilders = new List<MetaClassBuilder>();
             _references = new List<MetaModule>();
-        }
-
-        public MetaModule Build()
-        {
-            var ctx = new MetaObjectBuilderContext(0);
-            return new MetaModule(this, ctx);
         }
 
         public MetaClassBuilder AddClass(string className)
@@ -118,6 +103,11 @@ namespace Meticulous.Meta
         }
 
         #endregion
+
+        internal override MetaModule Build(MetaObjectBuilderContext context)
+        {
+            return new MetaModule(this, context);
+        }
     }
 
 }

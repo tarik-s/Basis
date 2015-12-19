@@ -11,6 +11,7 @@ namespace Meticulous.Meta
         public abstract void VisitClass(MetaClass metaClass, TContext context);
         public abstract void VisitModule(MetaModule metaModule, TContext context);
         public abstract void VisitMethod(MetaMethod metaMethod, TContext context);
+        public abstract void VisitParameter(MetaParameter metaParameter, TContext context);
         public abstract void VisitField(MetaField metaMethod, TContext context);
     }
 

@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Meticulous.Meta
 {
@@ -17,7 +16,7 @@ namespace Meticulous.Meta
         private readonly ImmutableArray<MetaField> _fields;
 
         internal MetaClass(MetaClassBuilder builder, MetaObjectBuilderContext context)
-            : base(MetaType.Class, builder)
+            : base(MetaType.Class, builder.Name)
         {
             using (context.CreateScope(this))
             {
@@ -62,7 +61,7 @@ namespace Meticulous.Meta
         }
     }
 
-    public class MetaClassBuilder : MetaObjectBuilder
+    public class MetaClassBuilder : MetaObjectBuilder<MetaClass>
     {
         private readonly MetaClass _baseClass;
 
@@ -128,11 +127,8 @@ namespace Meticulous.Meta
             return _derivedBuilders.Select(b => new MetaClass(b, context)).ToImmutableArray();
         }
 
-        internal MetaClass Build(MetaObjectBuilderContext context)
+        internal override MetaClass Build(MetaObjectBuilderContext context)
         {
-            if (_baseClass == null)
-                return new MetaClass(this, context);
-
             using (context.CreateScope(_baseClass))
             {
                 return new MetaClass(this, context);

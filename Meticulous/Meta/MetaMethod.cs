@@ -9,7 +9,7 @@ namespace Meticulous.Meta
     public class MetaMethod : MetaObject
     {
         internal MetaMethod(MetaMethodBuilder builder, MetaObjectBuilderContext context)
-            : base(MetaType.Method, builder)
+            : base(MetaType.Method, builder.Name)
         {
             using (context.CreateScope(this))
             {
@@ -23,12 +23,20 @@ namespace Meticulous.Meta
         }
     }
 
-    public class MetaMethodBuilder : MetaObjectBuilder
+    public class MetaMethodBuilder : MetaObjectBuilder<MetaMethod>
     {
+        private readonly List<MetaParameterBuilder> _parameters;
+
         protected MetaMethodBuilder(string name)
             : base(name)
         {
+            _parameters = new List<MetaParameterBuilder>();
+        }
 
+
+        internal override MetaMethod Build(MetaObjectBuilderContext context)
+        {
+            return new MetaMethod(this, context);
         }
     }
 }

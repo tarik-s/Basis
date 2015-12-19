@@ -18,14 +18,6 @@ using Meticulous.Meta;
 
 namespace Meticulous.SandBox
 {
-    class Base
-    {
-        public static string MakeString(Base b)
-        {
-            return null;
-        }
-    }
-
 
     internal class MetaObjectPrinter : MetaObjectVisitor<StringBuilder>
     {
@@ -71,6 +63,11 @@ namespace Meticulous.SandBox
             throw new NotImplementedException();
         }
 
+        public override void VisitParameter(MetaParameter metaParameter, StringBuilder context)
+        {
+            throw new NotImplementedException();
+        }
+
         public override void VisitField(MetaField metaMethod, StringBuilder context)
         {
             throw new NotImplementedException();
@@ -79,60 +76,9 @@ namespace Meticulous.SandBox
 
     internal class Program
     {
-        private static ImmutableArray<int> test = ImmutableArray<int>.Empty;
-
-
-        //static Func<object, string> CreateFastConverter()
-        //{
-        //    var mi = typeof(Base).GetMethod("MakeString");
-
-        //    var objArg = Expression.Parameter(typeof(Object), "obj");
-
-
-        //    var arg = Expression.Convert(objArg, typeof(Base));
-        //    //var arg = Expression.TypeAs(objArg, typeof(Base));
-        //    var callExpr = Expression.Call(mi, arg);
-                        
-        //    var lambdaExpr = Expression.Lambda<Func<object, string>>(callExpr, objArg);
-
-        //    Console.WriteLine(lambdaExpr);
-
-        //    var lambda = lambdaExpr.Compile();
-        //    return lambda;
-        //}
-
-        //static Func<object, string> CreateDirectConverter()
-        //{
-        //    return obj => Base.MakeString((Base)obj);
-        //}
-
-
-        //static Func<object, string> CreateSlowConverter()
-        //{
-        //    var mi = typeof(Base).GetMethod("MakeString");
-
-        //    return b => (string) mi.Invoke(null, new object[] { b });
-        //}
-
-        //private static TimeSpan TestConverter(Func<Base, string> converter)
-        //{
-        //    var b = new Base();
-        //    var sw = Stopwatch.StartNew();
-
-
-        //    for (int i = 0; i < 10000000; ++i)
-        //    {
-        //        converter(b);
-        //    }
-
-        //    sw.Stop();
-        //    return sw.Elapsed;
-        //}
-
+ 
         private static int Main(string[] args)
         {
-            var l = test.Length;
-
             var baseModuleBuilder = new MetaModuleBuilder("BaseModule");
 
             var classBuilder = baseModuleBuilder.AddClass("JsObject");
@@ -144,8 +90,6 @@ namespace Meticulous.SandBox
             var moduleBuilder = new MetaModuleBuilder("ChildModule");
 
             moduleBuilder.AddReference(baseModule);
-
-            
 
             moduleBuilder.AddClass("JsFileSystemObject", classes[0])
                 .AddDerivedClass("JsFile", fileClass =>
@@ -177,47 +121,12 @@ namespace Meticulous.SandBox
 
             Console.Write(tree);
 
-            //var slowCvt = CreateSlowConverter();
-            //var fastCvt = CreateFastConverter();
-            //var directCvt = CreateDirectConverter();
-
-            //var slowTest = TestConverter(slowCvt);
-            //var fastTest = TestConverter(fastCvt);
-            //var directTest = TestConverter(directCvt);
-
-            //Console.WriteLine("Slow  : " + slowTest.Ticks);
-            //Console.WriteLine("Fast  : " + fastTest.Ticks);
-            //Console.WriteLine("Direct: " + directTest.Ticks);
-
-            Console.ReadKey();
-            return 1;
-
-            var result = RunLoop.RunMain(MainImpl);
-            //var q = ExecutionQueue.Create(ExecutionQueueProcessorType.ThreadPool);
-
-            Console.WriteLine("Finshed with code: " + result);
             Console.WriteLine("Press any key...");
             Console.ReadKey();
 
-            Environment.ExitCode = result;
-            return result;
+            Environment.ExitCode = 0;
+            return 0;
 
-        }
-
-        private static async Task TestAsync()
-        {
-            Console.WriteLine("#1: " + Thread.CurrentThread.ManagedThreadId);
-            await Task.Delay(1000);
-            Console.WriteLine("#2: " + Thread.CurrentThread.ManagedThreadId);
-            RunLoop.MainLoop.Stop(123);
-            await Task.Delay(1000);
-            Console.WriteLine("#3: " + Thread.CurrentThread.ManagedThreadId);
-        }
-
-
-        private static void MainImpl()
-        {
-            TestAsync().Wait();
         }
     }
 }

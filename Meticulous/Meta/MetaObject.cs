@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Configuration;
 using System.Text;
 using System.Threading.Tasks;
+using Meticulous.Patterns;
 
 namespace Meticulous.Meta
 {
@@ -15,6 +16,7 @@ namespace Meticulous.Meta
         Module,
         Class,
         Method,
+        Parameter,
         Field
     }
 
@@ -24,18 +26,12 @@ namespace Meticulous.Meta
         private readonly string _name;
         private readonly MetaType _type;
 
-        internal MetaObject(MetaType type, MetaObjectBuilder builder)
-            : this(type, builder.Name)
-        {
-            
-        }
-
-        protected MetaObject(MetaType type, string name)
+        internal MetaObject(MetaType type, string name)
         {
             _type = type;
             _name = name;
         }
-
+        
         public MetaType Type
         {
             get { return _type; }
@@ -49,7 +45,8 @@ namespace Meticulous.Meta
         public abstract void Accept<TContext>(MetaObjectVisitor<TContext> metaObjectVisitor, TContext context);
     }
 
-    public abstract class MetaObjectBuilder
+    public abstract class MetaObjectBuilder<TMetaObject> : IBuilder<TMetaObject>
+        where TMetaObject : MetaObject
     {
         private readonly string _name;
 
@@ -63,6 +60,14 @@ namespace Meticulous.Meta
         public string Name
         {
             get { return _name; }
+        }
+
+        internal abstract TMetaObject Build(MetaObjectBuilderContext context);
+
+        public TMetaObject Build()
+        {
+            var ctx = new MetaObjectBuilderContext(0);
+            return Build(ctx);
         }
     }
 
@@ -85,8 +90,6 @@ namespace Meticulous.Meta
         public IDisposable CreateScope<TObject>(TObject obj)
             where TObject : MetaObject
         {
-            Check.ArgumentNotNull(obj, "obj");
-
             return new Scope<TObject>(this, obj);
         }
 
@@ -184,12 +187,14 @@ namespace Meticulous.Meta
                 _obj = obj;
                 _ctx = ctx;
 
-                _ctx.Add(obj);
+                if (_obj != null)
+                    _ctx.Add(obj);
             }
 
             public void Dispose()
             {
-                _ctx.Remove(_obj);
+                if (_obj != null)
+                    _ctx.Remove(_obj);
             }
         }
 
