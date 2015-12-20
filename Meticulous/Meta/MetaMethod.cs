@@ -12,7 +12,7 @@ namespace Meticulous.Meta
         private readonly ImmutableArray<MetaParameter> _parameters;
 
         internal MetaMethod(MetaMethodBuilder builder, MetaObjectBuilderContext context)
-            : base(MetaType.Method, builder.Name)
+            : base(builder)
         {
             using (context.CreateScope(this))
             {
@@ -37,7 +37,7 @@ namespace Meticulous.Meta
         private readonly List<MetaParameterBuilder> _parameters;
 
         public MetaMethodBuilder(string name)
-            : base(name)
+            : base(MetaType.Method, name)
         {
             _parameters = new List<MetaParameterBuilder>();
         }

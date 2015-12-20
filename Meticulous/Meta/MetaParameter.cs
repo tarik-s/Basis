@@ -9,7 +9,7 @@ namespace Meticulous.Meta
     public class MetaParameter : MetaObject
     {
         internal MetaParameter(MetaParameterBuilder builder, MetaObjectBuilderContext context)
-            : base(MetaType.Parameter, builder.Name)
+            : base(builder)
         {
         }
 
@@ -22,7 +22,7 @@ namespace Meticulous.Meta
     public class MetaParameterBuilder : MetaObjectBuilder<MetaParameter>
     {
         protected MetaParameterBuilder(string name)
-            : base(name)
+            : base(MetaType.Parameter, name)
         {
 
         }

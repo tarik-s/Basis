@@ -15,7 +15,7 @@ namespace Meticulous.Meta
         private readonly ImmutableArray<MetaModule> _references;
 
         internal MetaModule(MetaModuleBuilder builder, MetaObjectBuilderContext context)
-            : base(MetaType.Module, builder.Name)
+            : base(builder)
         {
             using (context.CreateScope(this))
             {
@@ -56,7 +56,7 @@ namespace Meticulous.Meta
         #endregion
         
         public MetaModuleBuilder(string name)
-            : base(name)
+            : base(MetaType.Module, name)
         {
             _classBuilders = new List<MetaClassBuilder>();
             _references = new List<MetaModule>();

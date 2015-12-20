@@ -9,7 +9,7 @@ namespace Meticulous.Meta
     public class MetaField : MetaObject
     {
         internal MetaField(MetaFieldBuilder builder, MetaObjectBuilderContext context)
-            : base(MetaType.Field, builder.Name)
+            : base(builder)
         {
             using (context.CreateScope(this))
             {
@@ -25,7 +25,7 @@ namespace Meticulous.Meta
     public class MetaFieldBuilder : MetaObjectBuilder<MetaField>
     {
         public MetaFieldBuilder(string name)
-            : base(name)
+            : base(MetaType.Field,  name)
         {
 
         }

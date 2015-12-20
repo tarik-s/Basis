@@ -16,7 +16,7 @@ namespace Meticulous.Meta
         private readonly ImmutableArray<MetaField> _fields;
 
         internal MetaClass(MetaClassBuilder builder, MetaObjectBuilderContext context)
-            : base(MetaType.Class, builder.Name)
+            : base(builder)
         {
             using (context.CreateScope(this))
             {
@@ -83,7 +83,7 @@ namespace Meticulous.Meta
         }
 
         public MetaClassBuilder(string name)
-            : base(name)
+            : base(MetaType.Class,  name)
         {
             _derivedBuilders = new List<MetaClassBuilder>();
             _fieldBuilders = new List<MetaFieldBuilder>();

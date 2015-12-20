@@ -26,10 +26,10 @@ namespace Meticulous.Meta
         private readonly string _name;
         private readonly MetaType _type;
 
-        internal MetaObject(MetaType type, string name)
+        internal MetaObject(MetaObjectBuilder builder)
         {
-            _type = type;
-            _name = name;
+            _type = builder.Type;
+            _name = builder.Name;
         }
         
         public MetaType Type
@@ -45,15 +45,16 @@ namespace Meticulous.Meta
         public abstract void Accept<TContext>(MetaObjectVisitor<TContext> metaObjectVisitor, TContext context);
     }
 
-    public abstract class MetaObjectBuilder<TMetaObject> : IBuilder<TMetaObject>
-        where TMetaObject : MetaObject
+    public abstract class MetaObjectBuilder : IBuilder<MetaObject>
     {
         private readonly string _name;
+        private readonly MetaType _type;
 
-        protected MetaObjectBuilder(string name)
+        protected MetaObjectBuilder(MetaType type, string name)
         {
             Check.ArgumentNotNull(name, "name");
 
+            _type = type;
             _name = name;
         }
 
@@ -62,18 +63,46 @@ namespace Meticulous.Meta
             get { return _name; }
         }
 
+        public MetaType Type
+        {
+            get { return _type; }
+        }
+
+        MetaObject IBuilder<MetaObject>.Build()
+        {
+            return BuildCore();
+        }
+
+        protected abstract MetaObject BuildCore();
+
+    }
+
+    public abstract class MetaObjectBuilder<TMetaObject> : MetaObjectBuilder, IBuilder<TMetaObject>
+        where TMetaObject : MetaObject
+    {
+        protected MetaObjectBuilder(MetaType type, string name)
+            : base(type, name)
+        {
+
+        }
+
         internal abstract TMetaObject Build(MetaObjectBuilderContext context);
 
         public TMetaObject Build()
         {
-            var ctx = new MetaObjectBuilderContext(0);
+            var ctx = new MetaObjectBuilderContext(this);
             return Build(ctx);
+        }
+
+        protected override MetaObject BuildCore()
+        {
+            return (TMetaObject)Build();
         }
     }
 
     internal class MetaObjectBuilderContext
     {
-        private readonly long _id;
+        private readonly MetaObjectBuilder _rootBuilder;
 
         private MetaModule _module;
         private List<MetaClass> _classes;
@@ -82,9 +111,9 @@ namespace Meticulous.Meta
         private MetaField _field;
 
 
-        public MetaObjectBuilderContext(long id)
+        public MetaObjectBuilderContext(MetaObjectBuilder rootBuilder)
         {
-            _id = id;
+            _rootBuilder = rootBuilder;
             _classes = new List<MetaClass>();
         }
 
@@ -94,9 +123,9 @@ namespace Meticulous.Meta
             return new Scope<TObject>(this, obj);
         }
 
-        public long Id
+        public MetaObjectBuilder RootBuilder
         {
-            get { return _id; }
+            get { return _rootBuilder; }
         }
 
         public MetaModule Module
