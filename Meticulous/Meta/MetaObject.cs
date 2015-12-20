@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Configuration;
@@ -97,6 +98,12 @@ namespace Meticulous.Meta
         protected override MetaObject BuildCore()
         {
             return (TMetaObject)Build();
+        }
+        // return _classBuilders.Select(cb => cb.Build(context)).ToImmutableArray();
+        internal static ImmutableArray<T> BuildSubObjects<T>(IEnumerable<MetaObjectBuilder<T>> builders, MetaObjectBuilderContext context)
+            where T : MetaObject
+        {
+            return builders.Select(b => b.Build(context)).ToImmutableArray();
         }
     }
 

@@ -23,10 +23,9 @@ namespace Meticulous.Meta
                 _module = context.Module;
                 _baseClass = context.BaseClass;
 
-                _derivedClasses = builder.BuildDerivedClasses(context);
-
                 _fields = builder.BuildFields(context);
                 _methods = builder.BuildMethods(context);
+                _derivedClasses = builder.BuildDerivedClasses(context);
             }
         }
 
@@ -134,17 +133,17 @@ namespace Meticulous.Meta
 
         internal ImmutableArray<MetaField> BuildFields(MetaObjectBuilderContext context)
         {
-            return _fieldBuilders.Select(fb => fb.Build(context)).ToImmutableArray();
+            return BuildSubObjects(_fieldBuilders, context);
         }
 
         internal ImmutableArray<MetaMethod> BuildMethods(MetaObjectBuilderContext context)
         {
-            return _methodBuilders.Select(mb => mb.Build(context)).ToImmutableArray();
+            return BuildSubObjects(_methodBuilders, context);
         }
 
         internal ImmutableArray<MetaClass> BuildDerivedClasses(MetaObjectBuilderContext context)
         {
-            return _derivedBuilders.Select(cb => cb.Build(context)).ToImmutableArray();
+            return BuildSubObjects(_derivedBuilders, context);
         }
 
         internal override MetaClass Build(MetaObjectBuilderContext context)

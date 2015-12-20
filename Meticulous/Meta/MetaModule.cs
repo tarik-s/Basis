@@ -114,7 +114,7 @@ namespace Meticulous.Meta
 
         internal ImmutableArray<MetaClass> BuildClasses(MetaObjectBuilderContext context)
         {
-            return _classBuilders.Select(cb => cb.Build(context)).ToImmutableArray();
+            return BuildSubObjects(_classBuilders, context);
         }
 
         #endregion
