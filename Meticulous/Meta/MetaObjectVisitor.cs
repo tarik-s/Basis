@@ -8,11 +8,11 @@ namespace Meticulous.Meta
 {
     public abstract class MetaObjectVisitor<TContext>
     {
-        public abstract void VisitClass(MetaClass metaClass, TContext context);
-        public abstract void VisitModule(MetaModule metaModule, TContext context);
-        public abstract void VisitMethod(MetaMethod metaMethod, TContext context);
-        public abstract void VisitParameter(MetaParameter metaParameter, TContext context);
-        public abstract void VisitField(MetaField metaMethod, TContext context);
+        public abstract void VisitClass(MetaClass @class, TContext context);
+        public abstract void VisitModule(MetaModule module, TContext context);
+        public abstract void VisitMethod(MetaMethod method, TContext context);
+        public abstract void VisitParameter(MetaParameter parameter, TContext context);
+        public abstract void VisitField(MetaField field, TContext context);
     }
 
     public interface IMetaObjectVisitable

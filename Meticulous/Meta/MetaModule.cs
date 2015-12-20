@@ -48,15 +48,21 @@ namespace Meticulous.Meta
 
     public class MetaModuleBuilder : MetaObjectBuilder<MetaModule>
     {
+        #region Fields
+
         private readonly List<MetaModule> _references;
         private readonly List<MetaClassBuilder> _classBuilders;
 
+        #endregion
+        
         public MetaModuleBuilder(string name)
             : base(name)
         {
             _classBuilders = new List<MetaClassBuilder>();
             _references = new List<MetaModule>();
         }
+
+        #region Classes
 
         public MetaClassBuilder AddClass(string className)
         {
@@ -76,10 +82,7 @@ namespace Meticulous.Meta
             return builder;
         }
 
-        internal ImmutableArray<MetaClass> BuildClasses(MetaObjectBuilderContext context)
-        {
-            return _classBuilders.Select(cb => cb.Build(context)).ToImmutableArray();
-        }
+        #endregion
 
         #region References
 
@@ -90,10 +93,8 @@ namespace Meticulous.Meta
             _references.Add(metaModule);
         }
 
-        public void AddReferences(IEnumerable<MetaModule> moduleInfos)
+        public void AddReferences(ImmutableArray<MetaModule> moduleInfos)
         {
-            Check.ArgumentNotNull(moduleInfos, "moduleInfos");
-
             _references.AddRange(moduleInfos);
         }
 
@@ -104,10 +105,19 @@ namespace Meticulous.Meta
 
         #endregion
 
+        #region Building
+
         internal override MetaModule Build(MetaObjectBuilderContext context)
         {
             return new MetaModule(this, context);
         }
+
+        internal ImmutableArray<MetaClass> BuildClasses(MetaObjectBuilderContext context)
+        {
+            return _classBuilders.Select(cb => cb.Build(context)).ToImmutableArray();
+        }
+
+        #endregion
     }
 
 }

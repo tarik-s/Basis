@@ -78,6 +78,7 @@ namespace Meticulous.Meta
         private MetaModule _module;
         private List<MetaClass> _classes;
         private MetaMethod _method;
+        private MetaParameter _parameter;
         private MetaField _field;
 
 
@@ -127,6 +128,16 @@ namespace Meticulous.Meta
             }
         }
 
+        public MetaMethod Method
+        {
+            get { return _method; }
+        }
+
+        public MetaParameter Parameter
+        {
+            get { return _parameter; }
+        }
+
         private void Add(MetaObject obj)
         {
             switch (obj.Type)
@@ -139,6 +150,9 @@ namespace Meticulous.Meta
                     break;
                 case MetaType.Method:
                     _method = (MetaMethod)obj;
+                    break;
+                case MetaType.Parameter:
+                    _parameter = (MetaParameter) obj;
                     break;
                 case MetaType.Field:
                     _field = (MetaField)obj;
@@ -165,6 +179,10 @@ namespace Meticulous.Meta
                 case MetaType.Method:
                     Check.OperationValid(_method == (MetaMethod)obj, msg);
                     _method = null;
+                    break;
+                case MetaType.Parameter:
+                    Check.OperationValid(_parameter == (MetaParameter)obj, msg);
+                    _parameter = null;
                     break;
                 case MetaType.Field:
                     Check.OperationValid(_field == (MetaField)obj, msg);

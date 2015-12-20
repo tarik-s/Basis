@@ -31,17 +31,22 @@ namespace Meticulous.SandBox
 
         public override void VisitClass(MetaClass metaClass, StringBuilder context)
         {
-            var baseName = metaClass.BaseClass != null ? ":" + metaClass.BaseClass.Name : String.Empty;
+            var baseName = metaClass.BaseClass != null ? " : " + metaClass.BaseClass.Name : String.Empty;
             context.AppendLine("  " + metaClass.Name + baseName);
-
-            foreach (var derivedClass in metaClass.DerivedClasses)
-            {
-                derivedClass.Accept(this, context);
-            }
 
             foreach (var field in metaClass.Fields)
             {
                 field.Accept(this, context);
+            }
+
+            foreach (var method in metaClass.Methods)
+            {
+                method.Accept(this, context);
+            }
+
+            foreach (var derivedClass in metaClass.DerivedClasses)
+            {
+                derivedClass.Accept(this, context);
             }
         }
 
@@ -60,17 +65,25 @@ namespace Meticulous.SandBox
 
         public override void VisitMethod(MetaMethod metaMethod, StringBuilder context)
         {
-            throw new NotImplementedException();
+            context.Append("    -" + metaMethod.Name + "(");
+
+            foreach (var parameter in metaMethod.Parameters)
+            {
+                parameter.Accept(this, context);
+                context.Append(", ");
+            }
+
+            context.AppendLine(");");
         }
 
         public override void VisitParameter(MetaParameter metaParameter, StringBuilder context)
         {
-            throw new NotImplementedException();
+            context.Append(metaParameter.Name);
         }
 
-        public override void VisitField(MetaField metaMethod, StringBuilder context)
+        public override void VisitField(MetaField field, StringBuilder context)
         {
-            throw new NotImplementedException();
+            context.AppendLine("    -" + field.Name + ";");
         }
     }
 
@@ -105,6 +118,9 @@ namespace Meticulous.SandBox
                         }).AddField("linkSize", fileLinkField =>
                         {
 
+                        }).AddMethod("Delete", deleteMethod =>
+                        {
+                            
                         });
                     });
                 })

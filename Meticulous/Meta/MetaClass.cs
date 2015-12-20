@@ -63,10 +63,16 @@ namespace Meticulous.Meta
 
     public class MetaClassBuilder : MetaObjectBuilder<MetaClass>
     {
-        private readonly MetaClass _baseClass;
+        #region Fields
 
+        private readonly MetaClass _baseClass;
         private readonly List<MetaClassBuilder> _derivedBuilders;
         private readonly List<MetaFieldBuilder> _fieldBuilders;
+        private readonly List<MetaMethodBuilder> _methodBuilders;
+
+        #endregion
+
+        #region Constructors
 
         internal MetaClassBuilder(string name, MetaClass baseClass)
             : this(name)
@@ -76,18 +82,21 @@ namespace Meticulous.Meta
             _baseClass = baseClass;
         }
 
-        internal MetaClassBuilder(string name)
+        public MetaClassBuilder(string name)
             : base(name)
         {
             _derivedBuilders = new List<MetaClassBuilder>();
             _fieldBuilders = new List<MetaFieldBuilder>();
+            _methodBuilders = new List<MetaMethodBuilder>();
         }
 
         private MetaClassBuilder(string name, MetaClassBuilder baseClassBuilder)
             : this(name)
         {
-            
+
         }
+
+        #endregion
 
         public MetaClass BaseClass
         {
@@ -103,6 +112,15 @@ namespace Meticulous.Meta
             return builder;
         }
 
+        public MetaMethodBuilder AddMethod(string name)
+        {
+            var methodBuilder = new MetaMethodBuilder(name);
+
+            _methodBuilders.Add(methodBuilder);
+
+            return methodBuilder;
+        }
+
         public MetaFieldBuilder AddField(string name)
         {
             var fieldBuilder = new MetaFieldBuilder(name);
@@ -112,19 +130,21 @@ namespace Meticulous.Meta
             return fieldBuilder;
         }
 
+        #region Building
+
         internal ImmutableArray<MetaField> BuildFields(MetaObjectBuilderContext context)
         {
-            return ImmutableArray<MetaField>.Empty;
+            return _fieldBuilders.Select(fb => fb.Build(context)).ToImmutableArray();
         }
 
         internal ImmutableArray<MetaMethod> BuildMethods(MetaObjectBuilderContext context)
         {
-            return ImmutableArray<MetaMethod>.Empty;
+            return _methodBuilders.Select(mb => mb.Build(context)).ToImmutableArray();
         }
 
         internal ImmutableArray<MetaClass> BuildDerivedClasses(MetaObjectBuilderContext context)
         {
-            return _derivedBuilders.Select(b => new MetaClass(b, context)).ToImmutableArray();
+            return _derivedBuilders.Select(cb => cb.Build(context)).ToImmutableArray();
         }
 
         internal override MetaClass Build(MetaObjectBuilderContext context)
@@ -134,6 +154,8 @@ namespace Meticulous.Meta
                 return new MetaClass(this, context);
             }
         }
+
+        #endregion
     }
 
 }
