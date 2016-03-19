@@ -6,18 +6,18 @@ using System.Threading.Tasks;
 
 namespace Meticulous.Meta
 {
-    public interface IMetaObjectVisitor<in TContext>
+    public interface IMetaTypeVisitor<in TContext>
     {
         void VisitModule(MetaModule module, TContext context);
         void VisitClass(MetaClass @class, TContext context);
-        void VisitMethod(MetaMethod method, TContext context);
+        void VisitMethod(MetaFunction function, TContext context);
         void VisitParameter(MetaParameter parameter, TContext context);
         void VisitField(MetaField field, TContext context);
         void VisitType(MetaType type, TContext context);
     }
 
-    public interface IVisitableMetaObject
+    public interface IVisitableMetaType
     {
-        void Accept<TContext>(IMetaObjectVisitor<TContext> visitor, TContext context);
+        void Accept<TContext>(IMetaTypeVisitor<TContext> visitor, TContext context);
     }
 }

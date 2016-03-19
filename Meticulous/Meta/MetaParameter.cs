@@ -9,13 +9,13 @@ namespace Meticulous.Meta
     public class MetaParameter : MetaObject
     {
         internal MetaParameter(MetaParameterBuilder builder, MetaObjectBuilderContext context)
-            : base(builder)
+            : base(builder, context.Module)
         {
         }
 
-        public override void Accept<TContext>(IMetaObjectVisitor<TContext> metaObjectVisitor, TContext context)
+        public override void Accept<TContext>(IMetaTypeVisitor<TContext> metaTypeVisitor, TContext context)
         {
-            metaObjectVisitor.VisitParameter(this, context);
+            metaTypeVisitor.VisitParameter(this, context);
         }
     }
 

@@ -13,26 +13,25 @@ using Meticulous.Patterns;
 namespace Meticulous.Meta
 { 
     [DebuggerDisplay("{Name}")]
-    public abstract class MetaObject : IVisitableMetaObject
+    public abstract class MetaObject : MetaType
     {
-        private readonly string _name;
-
+        private readonly MetaModule _module;
         protected MetaObject(string name)
+            : base(name)
         {
-            _name = name;
+            
         }
 
-        internal MetaObject(MetaObjectBuilder builder)
+        internal MetaObject(MetaObjectBuilder builder, MetaModule module)
+            : base(builder.Name)
         {
-            _name = builder.Name;
-        }
-        
-        public string Name
-        {
-            get { return _name; }
+            _module = module;
         }
 
-        public abstract void Accept<TContext>(IMetaObjectVisitor<TContext> metaObjectVisitor, TContext context);
+        public override MetaModule Module
+        {
+            get { return _module; }
+        }
     }
 
     public abstract class MetaObjectBuilder : IBuilder<MetaObject>
@@ -86,13 +85,13 @@ namespace Meticulous.Meta
         }
     }
 
-    internal class MetaObjectBuilderContext : IMetaObjectVisitor<bool>
+    internal class MetaObjectBuilderContext : IMetaTypeVisitor<bool>
     {
         private readonly MetaObjectBuilder _rootBuilder;
 
         private MetaModule _module;
         private MetaClass _class;
-        private MetaMethod _method;
+        private MetaFunction _function;
         private MetaParameter _parameter;
         private MetaField _field;
 
@@ -109,7 +108,7 @@ namespace Meticulous.Meta
                 _class = _class,
                 _field = _field,
                 _module = _module,
-                _method = _method,
+                _function = _function,
                 _parameter = _parameter
             };
            
@@ -137,9 +136,9 @@ namespace Meticulous.Meta
             get { return _class; }
         }
 
-        public MetaMethod Method
+        public MetaFunction Function
         {
-            get { return _method; }
+            get { return _function; }
         }
 
         public MetaParameter Parameter
@@ -167,14 +166,14 @@ namespace Meticulous.Meta
 
         public void VisitClass(MetaClass @class, bool context)
         {
-            Debug.Assert((context && _class == null) || (!context && _class == @class));
-            _class = context ? @class : null;
+            Debug.Assert((context && _class == @class.Base) || (!context && _class == @class));
+            _class = context ? @class : @class.Base;
         }
 
-        public void VisitMethod(MetaMethod method, bool context)
+        public void VisitMethod(MetaFunction function, bool context)
         {
-            Debug.Assert((context && _method == null) || (!context && _method == method));
-            _method = context ? method : null;
+            Debug.Assert((context && _function == null) || (!context && _function == function));
+            _function = context ? function : null;
         }
 
         public void VisitParameter(MetaParameter parameter, bool context)

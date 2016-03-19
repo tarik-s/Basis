@@ -20,7 +20,7 @@ namespace Meticulous.Meta
             return @this;
         }
 
-        public static MetaClassBuilder AddMethod(this MetaClassBuilder @this, string name, Action<MetaMethodBuilder> handler)
+        public static MetaClassBuilder AddMethod(this MetaClassBuilder @this, string name, Action<MetaFunctionBuilder> handler)
         {
             Check.This(@this);
 

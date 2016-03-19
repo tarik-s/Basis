@@ -1,34 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Meticulous.Meta
 {
-    public abstract class MetaType : MetaObject
+    [DisplayName("{Name}")]
+    public abstract class MetaType : IVisitableMetaType
     {
-        private readonly static VoidMetaType s_void = new VoidMetaType(null);
+        private readonly string _name;
 
-        private readonly MetaModule _modeule;
-
-        protected MetaType(MetaModule modeule, string name)
-            : base(name)
+        protected MetaType(string name)
         {
-            _modeule = modeule;
+            _name = name;
         }
 
-        public MetaModule Module
+        public string Name
         {
-            get { return _modeule; }
+            get { return _name; }
         }
 
-        public static VoidMetaType Void
-        {
-            get { return s_void; }
-        }
+        public abstract MetaModule Module { get; }
 
-        public override void Accept<TContext>(IMetaObjectVisitor<TContext> metaObjectVisitor, TContext context)
+        public virtual void Accept<TContext>(IMetaTypeVisitor<TContext> metaObjectVisitor, TContext context)
         {
             metaObjectVisitor.VisitType(this, context);
         }
@@ -36,15 +32,22 @@ namespace Meticulous.Meta
 
     public abstract class PlainMetaType : MetaType
     {
-        protected PlainMetaType(MetaModule module, string name)
-            : base(module, name)
+        private readonly CoreMetaModule _module;
+        protected PlainMetaType(CoreMetaModule module, string name)
+            : base(name)
         {
+            _module = module;
+        }
+
+        public override MetaModule Module
+        {
+            get { return _module; }
         }
     }
 
     public sealed class VoidMetaType : PlainMetaType
     {
-        internal VoidMetaType(MetaModule module)
+        internal VoidMetaType(CoreMetaModule module)
             : base(module, "void")
         {
         }
@@ -52,17 +55,19 @@ namespace Meticulous.Meta
 
     public class NumericMetaType : PlainMetaType
     {
-        protected NumericMetaType(MetaModule module, string name)
+        protected NumericMetaType(CoreMetaModule module, string name)
             : base(module, name)
         {
         }
     }
 
-    public class ObjectMetaType : MetaType // Should be a proxy
+    public sealed class BooleanMetaType : NumericMetaType
     {
-        protected ObjectMetaType(MetaModule module, string name)
-            : base(module, name)
+        public BooleanMetaType(CoreMetaModule module)
+            : base(module, "bool")
         {
         }
     }
+
+
 }

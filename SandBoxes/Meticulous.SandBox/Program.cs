@@ -23,7 +23,7 @@ using NLog;
 namespace Meticulous.SandBox
 {
 
-    internal class MetaObjectPrinter : IMetaObjectVisitor<StringBuilder>
+    internal class MetaTypePrinter : IMetaTypeVisitor<StringBuilder>
     {
         public string Visit(MetaModule module)
         {
@@ -57,21 +57,21 @@ namespace Meticulous.SandBox
         public void VisitModule(MetaModule metaModule, StringBuilder context)
         {
             context.AppendLine(metaModule.Name);
-            foreach (IVisitableMetaObject metaClass in metaModule.Classes)
+            foreach (IVisitableMetaType metaType in metaModule.Types)
             {
-                metaClass.Accept(this, context);
+                metaType.Accept(this, context);
             }
-            foreach (IVisitableMetaObject module in metaModule.References)
+            foreach (IVisitableMetaType module in metaModule.References)
             {
                 module.Accept(this, context);
             }
         }
 
-        public void VisitMethod(MetaMethod metaMethod, StringBuilder context)
+        public void VisitMethod(MetaFunction metaFunction, StringBuilder context)
         {
-            context.Append("    -" + metaMethod.Name + "(");
+            context.Append("    -" + metaFunction.Name + "(");
 
-            foreach (var parameter in metaMethod.Parameters)
+            foreach (var parameter in metaFunction.Parameters)
             {
                 parameter.Accept(this, context);
                 context.Append(", ");
@@ -218,28 +218,28 @@ namespace Meticulous.SandBox
         {
 
 
-            s_logger.Info("hello world");
+            //s_logger.Info("hello world");
 
-            Parameter p;
-            var count = 7;
-            var ar = new int[count, count];
+            ////Parameter p;
+            //var count = 7;
+            //var ar = new int[count, count];
 
-            var words = new int[count];
-            for (var i = 0; i < words.Length; ++i)
-            {
-                words[i] = i + 1;
-            }
+            //var words = new int[count];
+            //for (var i = 0; i < words.Length; ++i)
+            //{
+            //    words[i] = i + 1;
+            //}
 
-            PrintArray(ar, count, count);
+            //PrintArray(ar, count, count);
 
-            Console.WriteLine();
+            //Console.WriteLine();
 
-            FillArray(ar, count, count, words);
+            //FillArray(ar, count, count, words);
 
-            PrintArray(ar, count, count);
+            //PrintArray(ar, count, count);
 
-            Console.ReadKey();
-            //return 0;
+            //Console.ReadKey();
+            ////return 0;
 
 
             var baseModuleBuilder = new MetaModuleBuilder("BaseModule");
@@ -281,7 +281,7 @@ namespace Meticulous.SandBox
 
             var module = moduleBuilder.Build();
 
-            var printer = new MetaObjectPrinter();
+            var printer = new MetaTypePrinter();
 
             var tree = printer.Visit(module);
 

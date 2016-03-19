@@ -170,10 +170,10 @@
     <Compile Include="Meta\MetaClass.cs" />
     <Compile Include="Meta\MetaExtensions.cs" />
     <Compile Include="Meta\MetaField.cs" />
-    <Compile Include="Meta\MetaMethod.cs" />
+    <Compile Include="Meta\MetaFunction.cs" />
     <Compile Include="Meta\MetaModule.cs" />
     <Compile Include="Meta\MetaObject.cs" />
-    <Compile Include="Meta\IMetaObjectVisitor.cs" />
+    <Compile Include="Meta\IMetaTypeVisitor.cs" />
     <Compile Include="Meta\MetaParameter.cs" />
     <Compile Include="Meta\MetaType.cs" />
     <Compile Include="Patterns\Builder.cs" />

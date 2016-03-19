@@ -45,6 +45,7 @@ namespace Meticulous.SandBox
         public Wall(Board board, Orientation orientation, Cell first, Cell second)
         {
             _board = board;
+            _orientation = orientation;
         }
 
         public Board Board
@@ -205,7 +206,9 @@ namespace Meticulous.SandBox
     public class BoardBuilder : IBuilder<Board>
     {
         private readonly Size _size;
+#pragma warning disable 414
         private readonly int _minSequenceSize;
+#pragma warning restore 414
         private readonly int _maxSequenceSize;
 
         public BoardBuilder(Size size)

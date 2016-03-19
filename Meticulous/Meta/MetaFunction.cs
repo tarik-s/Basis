@@ -7,17 +7,18 @@ using System.Threading.Tasks;
 
 namespace Meticulous.Meta
 {
-    public class MetaMethod : MetaObject
+    public class MetaFunction : MetaObject
     {
         private readonly MetaType _returnType;
         private readonly ImmutableArray<MetaParameter> _parameters;
 
-        internal MetaMethod(MetaMethodBuilder builder, MetaObjectBuilderContext context)
-            : base(builder)
+        internal MetaFunction(MetaFunctionBuilder builder, MetaObjectBuilderContext context)
+            : base(builder, context.Module)
         {
+            _returnType = builder.ReturnType;
+
             using (context.CreateScope(this))
             {
-                _returnType = builder.ReturnType;
                 _parameters = builder.BuildParameters(context);
             }
         }
@@ -31,23 +32,22 @@ namespace Meticulous.Meta
         {
             get { return _parameters; }
         }
-
-
-        public override void Accept<TContext>(IMetaObjectVisitor<TContext> metaObjectVisitor, TContext context)
+        
+        public override void Accept<TContext>(IMetaTypeVisitor<TContext> metaTypeVisitor, TContext context)
         {
-            metaObjectVisitor.VisitMethod(this, context);
+            metaTypeVisitor.VisitMethod(this, context);
         }
     }
 
-    public class MetaMethodBuilder : MetaObjectBuilder<MetaMethod>
+    public class MetaFunctionBuilder : MetaObjectBuilder<MetaFunction>
     {
         private MetaType _returnType;
         private readonly List<MetaParameterBuilder> _parameters;
 
-        public MetaMethodBuilder(string name)
+        public MetaFunctionBuilder(string name)
             : base(name)
         {
-            _returnType = MetaType.Void;
+            _returnType = MetaModule.Core.Void;
             _parameters = new List<MetaParameterBuilder>();
         }
 
@@ -60,9 +60,9 @@ namespace Meticulous.Meta
             set { _returnType = value; }
         }
 
-        internal override MetaMethod Build(MetaObjectBuilderContext context)
+        internal override MetaFunction Build(MetaObjectBuilderContext context)
         {
-            return new MetaMethod(this, context);
+            return new MetaFunction(this, context);
         }
 
         internal ImmutableArray<MetaParameter> BuildParameters(MetaObjectBuilderContext context)

@@ -10,30 +10,55 @@ namespace Meticulous.Meta
 {
     public class MetaModule : MetaObject
     {
-        private readonly ImmutableArray<MetaClass> _rootClasses;
-        private readonly ImmutableArray<MetaClass> _classes;
+        private static readonly CoreMetaModule s_coreModule = new CoreMetaModule();
 
-        private readonly ImmutableArray<MetaModule> _references;
-        private readonly ImmutableArray<MetaType> _types;
+        private readonly ImmutableArray<MetaModule> _references = ImmutableArray<MetaModule>.Empty;
+        private ImmutableArray<MetaType> _types = ImmutableArray<MetaType>.Empty;
+
+        private readonly ImmutableArray<MetaClass> _rootClasses = ImmutableArray<MetaClass>.Empty;
+        private readonly ImmutableArray<MetaClass> _classes= ImmutableArray<MetaClass>.Empty;
+
+
 
         internal MetaModule(MetaModuleBuilder builder, MetaObjectBuilderContext context)
-            : base(builder)
+            : base(builder, null)
         {
             _references = builder.GetReferences();
 
             var types = new List<MetaType>();
             using (context.CreateScope(this))
             {
+                // Build classes
                 _rootClasses = builder.BuildClasses(context);
-                _classes = _rootClasses;
+
+                var classes = new List<MetaClass>();
+                classes.AddRange(_rootClasses);
+
+                foreach (var @class in _rootClasses)
+                {
+                    classes.AddRange(@class.EnumerateSubclasses());
+                }
+                _classes = classes.OrderBy(c => c.Name).ToImmutableArray();
+
+                types.AddRange(classes);
             }
-            _types = types.ToImmutableArray();
+            SetTypes(types);
         }
 
-        private MetaModule(string name, Func<MetaModule, ImmutableArray<MetaType>> factory)
+        internal MetaModule(string name)
             : base(name)
         {
-            _types = factory(this);
+            
+        }
+
+        public static CoreMetaModule Core
+        {
+            get { return s_coreModule; }
+        }
+
+        public ImmutableArray<MetaType> Types
+        {
+            get { return _types; }
         }
 
         public ImmutableArray<MetaClass> Classes
@@ -46,9 +71,9 @@ namespace Meticulous.Meta
             get { return _rootClasses; }
         }
 
-        public ImmutableArray<MetaType> Types
+        public override MetaModule Module
         {
-            get { return _types; }
+            get { return this; }
         }
 
         public ImmutableArray<MetaModule> References
@@ -56,9 +81,39 @@ namespace Meticulous.Meta
             get { return _references; }
         }
 
-        public override void Accept<TContext>(IMetaObjectVisitor<TContext> metaObjectVisitor, TContext context)
+        public override void Accept<TContext>(IMetaTypeVisitor<TContext> metaTypeVisitor, TContext context)
         {
-            metaObjectVisitor.VisitModule(this, context);
+            metaTypeVisitor.VisitModule(this, context);
+        }
+
+        internal void SetTypes(IEnumerable<MetaType> types)
+        {
+            _types = types.OrderBy(mt => mt.Name).ToImmutableArray();
+        }
+    }
+
+    public sealed class CoreMetaModule : MetaModule
+    {
+        private readonly VoidMetaType _void;
+        private readonly BooleanMetaType _bool;
+
+        internal CoreMetaModule()
+            : base("core")
+        {
+            _void = new VoidMetaType(this);
+            _bool = new BooleanMetaType(this);
+
+            SetTypes(new MetaType[] {_void, _bool});
+        }
+
+        public VoidMetaType Void
+        {
+            get { return _void; }
+        }
+
+        public BooleanMetaType Boolean
+        {
+            get { return _bool; }
         }
     }
 
@@ -76,6 +131,7 @@ namespace Meticulous.Meta
         {
             _classBuilders = new List<MetaClassBuilder>();
             _references = new List<MetaModule>();
+            _references.Add(MetaModule.Core);
         }
 
         #region Classes

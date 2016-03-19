@@ -8,17 +8,15 @@ namespace Meticulous.Meta
 {
     public class MetaClass : MetaObject
     {
-        private readonly MetaModule _module;
         private readonly MetaClass _base;
 
         private readonly ImmutableArray<MetaClass> _derivedClasses;
-        private readonly ImmutableArray<MetaMethod> _methods;
+        private readonly ImmutableArray<MetaFunction> _methods;
         private readonly ImmutableArray<MetaField> _fields;
 
         internal MetaClass(MetaClassBuilder builder, MetaObjectBuilderContext context)
-            : base(builder)
+            : base(builder, context.Module)
         {
-            _module = context.Module;
             _base = context.Class;
 
             using (context.CreateScope(this))
@@ -27,11 +25,6 @@ namespace Meticulous.Meta
                 _fields = builder.BuildFields(context);
                 _methods = builder.BuildMethods(context);
             }
-        }
-
-        public MetaModule Module
-        {
-            get { return _module; }
         }
 
         public MetaClass Base
@@ -44,7 +37,20 @@ namespace Meticulous.Meta
             get { return _derivedClasses; }
         }
 
-        public ImmutableArray<MetaMethod> Methods
+        public IEnumerable<MetaClass> EnumerateSubclasses()
+        {
+            foreach (var derivedClass in _derivedClasses)
+            {
+                yield return derivedClass;
+
+                foreach (var subclass in derivedClass.EnumerateSubclasses())
+                {
+                    yield return subclass;
+                }
+            }
+        }
+
+        public ImmutableArray<MetaFunction> Methods
         {
             get { return _methods; }
         }
@@ -54,9 +60,9 @@ namespace Meticulous.Meta
             get { return _fields; }
         }
 
-        public override void Accept<TContext>(IMetaObjectVisitor<TContext> metaObjectVisitor, TContext context)
+        public override void Accept<TContext>(IMetaTypeVisitor<TContext> metaTypeVisitor, TContext context)
         {
-            metaObjectVisitor.VisitClass(this, context);
+            metaTypeVisitor.VisitClass(this, context);
         }
     }
 
@@ -67,7 +73,7 @@ namespace Meticulous.Meta
         private readonly BaseHolder _base = BaseHolder.Null;
         private readonly List<MetaClassBuilder> _derivedBuilders;
         private readonly List<MetaFieldBuilder> _fieldBuilders;
-        private readonly List<MetaMethodBuilder> _methodBuilders;
+        private readonly List<MetaFunctionBuilder> _methodBuilders;
 
         #endregion
 
@@ -86,7 +92,7 @@ namespace Meticulous.Meta
         {
             _derivedBuilders = new List<MetaClassBuilder>();
             _fieldBuilders = new List<MetaFieldBuilder>();
-            _methodBuilders = new List<MetaMethodBuilder>();
+            _methodBuilders = new List<MetaFunctionBuilder>();
         }
 
         private MetaClassBuilder(string name, MetaClassBuilder baseClassBuilder)
@@ -108,9 +114,9 @@ namespace Meticulous.Meta
             return builder;
         }
 
-        public MetaMethodBuilder AddMethod(string name)
+        public MetaFunctionBuilder AddMethod(string name)
         {
-            var methodBuilder = new MetaMethodBuilder(name);
+            var methodBuilder = new MetaFunctionBuilder(name);
 
             _methodBuilders.Add(methodBuilder);
 
@@ -133,7 +139,7 @@ namespace Meticulous.Meta
             return BuildSubObjects(_fieldBuilders, context);
         }
 
-        internal ImmutableArray<MetaMethod> BuildMethods(MetaObjectBuilderContext context)
+        internal ImmutableArray<MetaFunction> BuildMethods(MetaObjectBuilderContext context)
         {
             return BuildSubObjects(_methodBuilders, context);
         }
