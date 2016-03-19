@@ -13,7 +13,7 @@ namespace Meticulous.Meta
         {
         }
 
-        public override void Accept<TContext>(MetaObjectVisitor<TContext> metaObjectVisitor, TContext context)
+        public override void Accept<TContext>(IMetaObjectVisitor<TContext> metaObjectVisitor, TContext context)
         {
             metaObjectVisitor.VisitParameter(this, context);
         }
@@ -22,7 +22,7 @@ namespace Meticulous.Meta
     public class MetaParameterBuilder : MetaObjectBuilder<MetaParameter>
     {
         protected MetaParameterBuilder(string name)
-            : base(MetaType.Parameter, name)
+            : base(name)
         {
 
         }

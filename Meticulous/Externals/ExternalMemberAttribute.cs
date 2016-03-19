@@ -26,7 +26,7 @@ namespace Meticulous.Externals
         /// <param name="name">The name.</param>
         protected ExternalMemberAttribute(string name)
         {
-            Check.ArgumentNotEmpty(name, "name");
+            Check.ArgumentNotEmpty(name, "name"); 
 
             _name = name;
         }

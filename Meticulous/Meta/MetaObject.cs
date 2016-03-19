@@ -6,56 +6,41 @@ using System.Linq;
 using System.Net.Configuration;
 using System.Text;
 using System.Threading.Tasks;
+using Meticulous;
+using Meticulous.Meta;
 using Meticulous.Patterns;
 
 namespace Meticulous.Meta
-{
-    [Serializable]
-    public enum MetaType
-    {
-        Unknown,
-        Module,
-        Class,
-        Method,
-        Parameter,
-        Field
-    }
-
+{ 
     [DebuggerDisplay("{Name}")]
-    public abstract class MetaObject : IMetaObjectVisitable
+    public abstract class MetaObject : IVisitableMetaObject
     {
         private readonly string _name;
-        private readonly MetaType _type;
+
+        protected MetaObject(string name)
+        {
+            _name = name;
+        }
 
         internal MetaObject(MetaObjectBuilder builder)
         {
-            _type = builder.Type;
             _name = builder.Name;
         }
         
-        public MetaType Type
-        {
-            get { return _type; }
-        }
-
         public string Name
         {
             get { return _name; }
         }
 
-        public abstract void Accept<TContext>(MetaObjectVisitor<TContext> metaObjectVisitor, TContext context);
+        public abstract void Accept<TContext>(IMetaObjectVisitor<TContext> metaObjectVisitor, TContext context);
     }
 
     public abstract class MetaObjectBuilder : IBuilder<MetaObject>
     {
         private readonly string _name;
-        private readonly MetaType _type;
 
-        protected MetaObjectBuilder(MetaType type, string name)
+        protected MetaObjectBuilder(string name)
         {
-            Check.ArgumentNotNull(name, "name");
-
-            _type = type;
             _name = name;
         }
 
@@ -64,25 +49,19 @@ namespace Meticulous.Meta
             get { return _name; }
         }
 
-        public MetaType Type
-        {
-            get { return _type; }
-        }
-
         MetaObject IBuilder<MetaObject>.Build()
         {
             return BuildCore();
         }
 
         protected abstract MetaObject BuildCore();
-
     }
 
     public abstract class MetaObjectBuilder<TMetaObject> : MetaObjectBuilder, IBuilder<TMetaObject>
         where TMetaObject : MetaObject
     {
-        protected MetaObjectBuilder(MetaType type, string name)
-            : base(type, name)
+        protected MetaObjectBuilder(string name)
+            : base(name)
         {
 
         }
@@ -99,7 +78,7 @@ namespace Meticulous.Meta
         {
             return (TMetaObject)Build();
         }
-        // return _classBuilders.Select(cb => cb.Build(context)).ToImmutableArray();
+
         internal static ImmutableArray<T> BuildSubObjects<T>(IEnumerable<MetaObjectBuilder<T>> builders, MetaObjectBuilderContext context)
             where T : MetaObject
         {
@@ -107,12 +86,12 @@ namespace Meticulous.Meta
         }
     }
 
-    internal class MetaObjectBuilderContext
+    internal class MetaObjectBuilderContext : IMetaObjectVisitor<bool>
     {
         private readonly MetaObjectBuilder _rootBuilder;
 
         private MetaModule _module;
-        private List<MetaClass> _classes;
+        private MetaClass _class;
         private MetaMethod _method;
         private MetaParameter _parameter;
         private MetaField _field;
@@ -121,7 +100,20 @@ namespace Meticulous.Meta
         public MetaObjectBuilderContext(MetaObjectBuilder rootBuilder)
         {
             _rootBuilder = rootBuilder;
-            _classes = new List<MetaClass>();
+        }
+
+        public MetaObjectBuilderContext Copy()
+        {
+            var ctx = new MetaObjectBuilderContext(_rootBuilder)
+            {
+                _class = _class,
+                _field = _field,
+                _module = _module,
+                _method = _method,
+                _parameter = _parameter
+            };
+           
+            return ctx;
         }
 
         public IDisposable CreateScope<TObject>(TObject obj)
@@ -142,26 +134,7 @@ namespace Meticulous.Meta
 
         public MetaClass Class
         {
-            get
-            {
-                var count = _classes.Count;
-                if (count == 0)
-                    return null;
-
-                return _classes[count - 1];
-            }
-        }
-
-        public MetaClass BaseClass 
-        {
-            get
-            {
-                var count = _classes.Count;
-                if (count < 2)
-                    return null;
-
-                return _classes[count - 2];
-            }
+            get { return _class; }
         }
 
         public MetaMethod Method
@@ -176,62 +149,55 @@ namespace Meticulous.Meta
 
         private void Add(MetaObject obj)
         {
-            switch (obj.Type)
-            {
-                case MetaType.Module:
-                    _module = (MetaModule)obj;
-                    break;
-                case MetaType.Class:
-                    _classes.Add((MetaClass)obj);
-                    break;
-                case MetaType.Method:
-                    _method = (MetaMethod)obj;
-                    break;
-                case MetaType.Parameter:
-                    _parameter = (MetaParameter) obj;
-                    break;
-                case MetaType.Field:
-                    _field = (MetaField)obj;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            obj.Accept(this, true);
         }
 
         private void Remove(MetaObject obj)
         {
-            const string msg = "Operation called in the wrong order";
-            switch (obj.Type)
-            {
-                case MetaType.Module:
-                    Check.OperationValid(_module == (MetaModule)obj, msg);
-                    _module = null;
-                    break;
-                case MetaType.Class:
-                    var count = _classes.Count;
-                    Check.OperationValid(count > 0 && _classes[count - 1] == (MetaClass)obj, msg);
-                    _classes.RemoveAt(count - 1);
-                    break;
-                case MetaType.Method:
-                    Check.OperationValid(_method == (MetaMethod)obj, msg);
-                    _method = null;
-                    break;
-                case MetaType.Parameter:
-                    Check.OperationValid(_parameter == (MetaParameter)obj, msg);
-                    _parameter = null;
-                    break;
-                case MetaType.Field:
-                    Check.OperationValid(_field == (MetaField)obj, msg);
-                    _field = null;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            obj.Accept(this, false);
         }
 
+        #region Visitor
 
-        private class Scope<TObject> : IDisposable
-            where TObject: MetaObject
+        public void VisitModule(MetaModule module, bool context)
+        {
+            Debug.Assert((context && _module == null) || (!context && _module == module));
+            _module = context ? module : null;
+        }
+
+        public void VisitClass(MetaClass @class, bool context)
+        {
+            Debug.Assert((context && _class == null) || (!context && _class == @class));
+            _class = context ? @class : null;
+        }
+
+        public void VisitMethod(MetaMethod method, bool context)
+        {
+            Debug.Assert((context && _method == null) || (!context && _method == method));
+            _method = context ? method : null;
+        }
+
+        public void VisitParameter(MetaParameter parameter, bool context)
+        {
+            Debug.Assert((context && _parameter == null) || (!context && _parameter == parameter));
+            _parameter = context ? parameter : null;
+        }
+
+        public void VisitField(MetaField field, bool context)
+        {
+            Debug.Assert((context && _field == null) || (!context && _field == field));
+            _field = context ? field : null;
+        }
+
+        public void VisitType(MetaType type, bool context)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        private sealed class Scope<TObject> : IDisposable
+            where TObject : MetaObject
         {
             private readonly MetaObjectBuilderContext _ctx;
             private readonly TObject _obj;

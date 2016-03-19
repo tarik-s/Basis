@@ -12,17 +12,28 @@ namespace Meticulous.Meta
     {
         private readonly ImmutableArray<MetaClass> _rootClasses;
         private readonly ImmutableArray<MetaClass> _classes;
+
         private readonly ImmutableArray<MetaModule> _references;
+        private readonly ImmutableArray<MetaType> _types;
 
         internal MetaModule(MetaModuleBuilder builder, MetaObjectBuilderContext context)
             : base(builder)
         {
+            _references = builder.GetReferences();
+
+            var types = new List<MetaType>();
             using (context.CreateScope(this))
             {
-                _references = builder.GetReferences();
                 _rootClasses = builder.BuildClasses(context);
                 _classes = _rootClasses;
             }
+            _types = types.ToImmutableArray();
+        }
+
+        private MetaModule(string name, Func<MetaModule, ImmutableArray<MetaType>> factory)
+            : base(name)
+        {
+            _types = factory(this);
         }
 
         public ImmutableArray<MetaClass> Classes
@@ -35,12 +46,17 @@ namespace Meticulous.Meta
             get { return _rootClasses; }
         }
 
+        public ImmutableArray<MetaType> Types
+        {
+            get { return _types; }
+        }
+
         public ImmutableArray<MetaModule> References
         {
             get { return _references; }
         }
 
-        public override void Accept<TContext>(MetaObjectVisitor<TContext> metaObjectVisitor, TContext context)
+        public override void Accept<TContext>(IMetaObjectVisitor<TContext> metaObjectVisitor, TContext context)
         {
             metaObjectVisitor.VisitModule(this, context);
         }
@@ -56,7 +72,7 @@ namespace Meticulous.Meta
         #endregion
         
         public MetaModuleBuilder(string name)
-            : base(MetaType.Module, name)
+            : base(name)
         {
             _classBuilders = new List<MetaClassBuilder>();
             _references = new List<MetaModule>();

@@ -16,7 +16,7 @@ namespace Meticulous.Meta
             }
         }
 
-        public override void Accept<TContext>(MetaObjectVisitor<TContext> metaObjectVisitor, TContext context)
+        public override void Accept<TContext>(IMetaObjectVisitor<TContext> metaObjectVisitor, TContext context)
         {
             metaObjectVisitor.VisitField(this, context);
         }
@@ -25,7 +25,7 @@ namespace Meticulous.Meta
     public class MetaFieldBuilder : MetaObjectBuilder<MetaField>
     {
         public MetaFieldBuilder(string name)
-            : base(MetaType.Field,  name)
+            : base(name)
         {
 
         }

@@ -9,6 +9,7 @@ namespace Meticulous.Meta
 {
     public class MetaMethod : MetaObject
     {
+        private readonly MetaType _returnType;
         private readonly ImmutableArray<MetaParameter> _parameters;
 
         internal MetaMethod(MetaMethodBuilder builder, MetaObjectBuilderContext context)
@@ -16,8 +17,14 @@ namespace Meticulous.Meta
         {
             using (context.CreateScope(this))
             {
+                _returnType = builder.ReturnType;
                 _parameters = builder.BuildParameters(context);
             }
+        }
+
+        public MetaType ReturnType
+        {
+            get { return _returnType; }
         }
 
         public ImmutableArray<MetaParameter> Parameters
@@ -26,7 +33,7 @@ namespace Meticulous.Meta
         }
 
 
-        public override void Accept<TContext>(MetaObjectVisitor<TContext> metaObjectVisitor, TContext context)
+        public override void Accept<TContext>(IMetaObjectVisitor<TContext> metaObjectVisitor, TContext context)
         {
             metaObjectVisitor.VisitMethod(this, context);
         }
@@ -34,16 +41,24 @@ namespace Meticulous.Meta
 
     public class MetaMethodBuilder : MetaObjectBuilder<MetaMethod>
     {
+        private MetaType _returnType;
         private readonly List<MetaParameterBuilder> _parameters;
 
         public MetaMethodBuilder(string name)
-            : base(MetaType.Method, name)
+            : base(name)
         {
+            _returnType = MetaType.Void;
             _parameters = new List<MetaParameterBuilder>();
         }
 
 
         #region Buildings
+
+        public MetaType ReturnType
+        {
+            get { return _returnType; }
+            set { _returnType = value; }
+        }
 
         internal override MetaMethod Build(MetaObjectBuilderContext context)
         {

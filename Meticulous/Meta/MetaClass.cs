@@ -9,7 +9,7 @@ namespace Meticulous.Meta
     public class MetaClass : MetaObject
     {
         private readonly MetaModule _module;
-        private readonly MetaClass _baseClass;
+        private readonly MetaClass _base;
 
         private readonly ImmutableArray<MetaClass> _derivedClasses;
         private readonly ImmutableArray<MetaMethod> _methods;
@@ -18,14 +18,14 @@ namespace Meticulous.Meta
         internal MetaClass(MetaClassBuilder builder, MetaObjectBuilderContext context)
             : base(builder)
         {
+            _module = context.Module;
+            _base = context.Class;
+
             using (context.CreateScope(this))
             {
-                _module = context.Module;
-                _baseClass = context.BaseClass;
-
+                _derivedClasses = builder.BuildDerivedClasses(context);
                 _fields = builder.BuildFields(context);
                 _methods = builder.BuildMethods(context);
-                _derivedClasses = builder.BuildDerivedClasses(context);
             }
         }
 
@@ -34,9 +34,9 @@ namespace Meticulous.Meta
             get { return _module; }
         }
 
-        public MetaClass BaseClass
+        public MetaClass Base
         {
-            get { return _baseClass; }
+            get { return _base; }
         }
 
         public ImmutableArray<MetaClass> DerivedClasses
@@ -54,7 +54,7 @@ namespace Meticulous.Meta
             get { return _fields; }
         }
 
-        public override void Accept<TContext>(MetaObjectVisitor<TContext> metaObjectVisitor, TContext context)
+        public override void Accept<TContext>(IMetaObjectVisitor<TContext> metaObjectVisitor, TContext context)
         {
             metaObjectVisitor.VisitClass(this, context);
         }
@@ -64,7 +64,7 @@ namespace Meticulous.Meta
     {
         #region Fields
 
-        private readonly MetaClass _baseClass;
+        private readonly BaseHolder _base = BaseHolder.Null;
         private readonly List<MetaClassBuilder> _derivedBuilders;
         private readonly List<MetaFieldBuilder> _fieldBuilders;
         private readonly List<MetaMethodBuilder> _methodBuilders;
@@ -78,11 +78,11 @@ namespace Meticulous.Meta
         {
             Check.ArgumentNotNull(baseClass, "baseClass");
 
-            _baseClass = baseClass;
+            _base = new BaseClassProxy(baseClass);
         }
 
         public MetaClassBuilder(string name)
-            : base(MetaType.Class,  name)
+            : base(name)
         {
             _derivedBuilders = new List<MetaClassBuilder>();
             _fieldBuilders = new List<MetaFieldBuilder>();
@@ -92,15 +92,12 @@ namespace Meticulous.Meta
         private MetaClassBuilder(string name, MetaClassBuilder baseClassBuilder)
             : this(name)
         {
+            Check.ArgumentNotNull(baseClassBuilder, "baseClassBuilder");
 
+            _base = new BaseClassBuilderProxy(baseClassBuilder);
         }
 
         #endregion
-
-        public MetaClass BaseClass
-        {
-            get { return _baseClass; }
-        }
 
         public MetaClassBuilder AddDerivedClass(string name)
         {
@@ -148,13 +145,55 @@ namespace Meticulous.Meta
 
         internal override MetaClass Build(MetaObjectBuilderContext context)
         {
-            using (context.CreateScope(_baseClass))
+            using (context.CreateScope(_base.Class))
             {
                 return new MetaClass(this, context);
             }
         }
 
         #endregion
+
+        private class BaseHolder
+        {
+            public static readonly BaseHolder Null = new BaseHolder();
+            public virtual MetaClass Class
+            {
+                get { return null; }
+            }
+
+            public virtual MetaClassBuilder ClassBuilder
+            {
+                get { return null; }
+            }
+        }
+
+        private sealed class BaseClassProxy : BaseHolder
+        {
+            private readonly MetaClass _class;
+            public BaseClassProxy(MetaClass @class)
+            {
+                _class = @class;
+            }
+
+            public override MetaClass Class
+            {
+                get { return _class; }
+            }
+        }
+
+        private sealed class BaseClassBuilderProxy : BaseHolder
+        {
+            private readonly MetaClassBuilder _builder;
+            public BaseClassBuilderProxy(MetaClassBuilder builder)
+            {
+                _builder = builder;
+            }
+
+            public override MetaClassBuilder ClassBuilder
+            {
+                get { return _builder; }
+            }
+        }
     }
 
 }
