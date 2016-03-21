@@ -46,7 +46,7 @@ namespace Meticulous.Meta
         }
 
         internal MetaModule(string name)
-            : base(name)
+            : base(name, null)
         {
             
         }
@@ -69,6 +69,11 @@ namespace Meticulous.Meta
         public ImmutableArray<MetaClass> RootClasses
         {
             get { return _rootClasses; }
+        }
+
+        internal override void ResolveDeferredMembers(MetaObjectBuilderContext context)
+        {
+            ResolveDeferredMembers(_rootClasses, context);
         }
 
         public override MetaModule Module

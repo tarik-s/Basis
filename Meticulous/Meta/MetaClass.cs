@@ -21,9 +21,10 @@ namespace Meticulous.Meta
 
             using (context.CreateScope(this))
             {
-                _derivedClasses = builder.BuildDerivedClasses(context);
                 _fields = builder.BuildFields(context);
                 _methods = builder.BuildMethods(context);
+
+                _derivedClasses = builder.BuildDerivedClasses(context);
             }
         }
 
@@ -63,6 +64,13 @@ namespace Meticulous.Meta
         public override void Accept<TContext>(IMetaTypeVisitor<TContext> metaTypeVisitor, TContext context)
         {
             metaTypeVisitor.VisitClass(this, context);
+        }
+
+        internal override void ResolveDeferredMembers(MetaObjectBuilderContext context)
+        {
+            ResolveDeferredMembers(_fields, context);
+            ResolveDeferredMembers(_methods, context);
+            ResolveDeferredMembers(_derivedClasses, context);
         }
     }
 

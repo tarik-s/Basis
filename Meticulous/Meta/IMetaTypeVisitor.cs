@@ -10,10 +10,10 @@ namespace Meticulous.Meta
     {
         void VisitModule(MetaModule module, TContext context);
         void VisitClass(MetaClass @class, TContext context);
-        void VisitMethod(MetaFunction function, TContext context);
+        void VisitFunction(MetaFunction function, TContext context);
         void VisitParameter(MetaParameter parameter, TContext context);
         void VisitField(MetaField field, TContext context);
-        void VisitType(MetaType type, TContext context);
+        void VisitPlainType(PlainMetaType type, TContext context);
     }
 
     public interface IVisitableMetaType

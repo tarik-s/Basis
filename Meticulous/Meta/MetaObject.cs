@@ -16,21 +16,31 @@ namespace Meticulous.Meta
     public abstract class MetaObject : MetaType
     {
         private readonly MetaModule _module;
-        protected MetaObject(string name)
+        protected MetaObject(string name, MetaModule module)
             : base(name)
-        {
-            
-        }
-
-        internal MetaObject(MetaObjectBuilder builder, MetaModule module)
-            : base(builder.Name)
         {
             _module = module;
         }
 
+        internal MetaObject(MetaObjectBuilder builder, MetaModule module)
+            : this(builder.Name, module)
+        {
+            
+        }
+
+        internal abstract void ResolveDeferredMembers(MetaObjectBuilderContext context);
+
         public override MetaModule Module
         {
             get { return _module; }
+        }
+
+        internal static void ResolveDeferredMembers(IEnumerable<MetaObject> members, MetaObjectBuilderContext context)
+        {
+            foreach (var member in members)
+            {
+                member.ResolveDeferredMembers(context);
+            }
         }
     }
 
@@ -70,7 +80,9 @@ namespace Meticulous.Meta
         public TMetaObject Build()
         {
             var ctx = new MetaObjectBuilderContext(this);
-            return Build(ctx);
+            var obj = Build(ctx);
+            obj.ResolveDeferredMembers(ctx);
+            return obj;
         }
 
         protected override MetaObject BuildCore()
@@ -170,7 +182,7 @@ namespace Meticulous.Meta
             _class = context ? @class : @class.Base;
         }
 
-        public void VisitMethod(MetaFunction function, bool context)
+        public void VisitFunction(MetaFunction function, bool context)
         {
             Debug.Assert((context && _function == null) || (!context && _function == function));
             _function = context ? function : null;
@@ -188,7 +200,7 @@ namespace Meticulous.Meta
             _field = context ? field : null;
         }
 
-        public void VisitType(MetaType type, bool context)
+        public void VisitPlainType(PlainMetaType type, bool context)
         {
             throw new NotImplementedException();
         }

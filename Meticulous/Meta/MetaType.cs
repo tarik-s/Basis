@@ -24,10 +24,7 @@ namespace Meticulous.Meta
 
         public abstract MetaModule Module { get; }
 
-        public virtual void Accept<TContext>(IMetaTypeVisitor<TContext> metaObjectVisitor, TContext context)
-        {
-            metaObjectVisitor.VisitType(this, context);
-        }
+        public abstract void Accept<TContext>(IMetaTypeVisitor<TContext> metaObjectVisitor, TContext context);
     }
 
     public abstract class PlainMetaType : MetaType
@@ -42,6 +39,11 @@ namespace Meticulous.Meta
         public override MetaModule Module
         {
             get { return _module; }
+        }
+
+        public override void Accept<TContext>(IMetaTypeVisitor<TContext> metaObjectVisitor, TContext context)
+        {
+            metaObjectVisitor.VisitPlainType(this, context);
         }
     }
 
@@ -69,5 +71,11 @@ namespace Meticulous.Meta
         }
     }
 
-
+    public class MetaTypeProxy
+    {
+        public MetaType Resolve(MetaModule module)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

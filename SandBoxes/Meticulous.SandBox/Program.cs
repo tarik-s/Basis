@@ -67,7 +67,7 @@ namespace Meticulous.SandBox
             }
         }
 
-        public void VisitMethod(MetaFunction metaFunction, StringBuilder context)
+        public void VisitFunction(MetaFunction metaFunction, StringBuilder context)
         {
             context.Append("    -" + metaFunction.Name + "(");
 
@@ -90,9 +90,9 @@ namespace Meticulous.SandBox
             context.AppendLine("    -" + field.Name + ";");
         }
 
-        public void VisitType(MetaType type, StringBuilder context)
+        public void VisitPlainType(PlainMetaType type, StringBuilder context)
         {
-            throw new NotImplementedException();
+            context.AppendLine("  " + type.Name + ";");
         }
     }
 
