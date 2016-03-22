@@ -17,6 +17,32 @@ namespace Meticulous.Meta
             _name = name;
         }
 
+
+        public static VoidMetaType Void
+        {
+            get { return MetaModule.Core.Void; }
+        }
+
+        public static BooleanMetaType Boolean
+        {
+            get { return MetaModule.Core.Boolean; }
+        }
+
+        public static IntegerMetaType Integer
+        {
+            get { return MetaModule.Core.Integer; }
+        }
+
+        public static FloatMetaType Float
+        {
+            get { return MetaModule.Core.Float; }
+        }
+
+        public static StringMetaType String
+        {
+            get { return MetaModule.Core.String; }
+        }
+
         public string Name
         {
             get { return _name; }
@@ -65,17 +91,35 @@ namespace Meticulous.Meta
 
     public sealed class BooleanMetaType : NumericMetaType
     {
-        public BooleanMetaType(CoreMetaModule module)
+        internal BooleanMetaType(CoreMetaModule module)
             : base(module, "bool")
         {
         }
     }
 
-    public class MetaTypeProxy
+    public sealed class IntegerMetaType : NumericMetaType
     {
-        public MetaType Resolve(MetaModule module)
+        internal IntegerMetaType(CoreMetaModule module)
+            : base(module, "int")
         {
-            throw new NotImplementedException();
         }
     }
+
+    public sealed class FloatMetaType : NumericMetaType
+    {
+        internal FloatMetaType(CoreMetaModule module)
+            : base(module, "float")
+        {
+        }
+    }
+
+    public sealed class StringMetaType : PlainMetaType
+    {
+        internal StringMetaType(CoreMetaModule module)
+            : base(module, "string")
+        {
+        }
+    }
+
+
 }

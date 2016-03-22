@@ -176,6 +176,7 @@
     <Compile Include="Meta\IMetaTypeVisitor.cs" />
     <Compile Include="Meta\MetaParameter.cs" />
     <Compile Include="Meta\MetaType.cs" />
+    <Compile Include="Meta\MetaTypeProxy.cs" />
     <Compile Include="Meta\MetaVariable.cs" />
     <Compile Include="Patterns\Builder.cs" />
     <Compile Include="Patterns\Composite.cs" />

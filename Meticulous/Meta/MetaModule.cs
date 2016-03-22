@@ -101,24 +101,45 @@ namespace Meticulous.Meta
     {
         private readonly VoidMetaType _void;
         private readonly BooleanMetaType _bool;
+        private readonly IntegerMetaType _int;
+        private readonly FloatMetaType _float;
+        private readonly StringMetaType _string;
 
         internal CoreMetaModule()
             : base("core")
         {
             _void = new VoidMetaType(this);
             _bool = new BooleanMetaType(this);
+            _int = new IntegerMetaType(this);
+            _float = new FloatMetaType(this);
+            _string = new StringMetaType(this);
 
-            SetTypes(new MetaType[] {_void, _bool});
+            SetTypes(new MetaType[] {_void, _bool, _int, _float, _string});
         }
 
-        public VoidMetaType Void
+        public new VoidMetaType Void
         {
             get { return _void; }
         }
 
-        public BooleanMetaType Boolean
+        public new BooleanMetaType Boolean
         {
             get { return _bool; }
+        }
+
+        public new IntegerMetaType Integer
+        {
+            get { return _int; }
+        }
+
+        public new FloatMetaType Float
+        {
+            get { return _float; }
+        }
+
+        public new StringMetaType String
+        {
+            get { return _string; }
         }
     }
 

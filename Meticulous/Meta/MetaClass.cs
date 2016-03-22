@@ -167,9 +167,16 @@ namespace Meticulous.Meta
 
         #endregion
 
+        #region BaseHolder
+
         private class BaseHolder
         {
             public static readonly BaseHolder Null = new BaseHolder();
+
+            protected BaseHolder()
+            {
+            }
+
             public virtual MetaClass Class
             {
                 get { return null; }
@@ -208,6 +215,8 @@ namespace Meticulous.Meta
                 get { return _builder; }
             }
         }
+
+        #endregion
     }
 
 }

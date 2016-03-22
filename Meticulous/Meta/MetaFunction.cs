@@ -58,6 +58,11 @@ namespace Meticulous.Meta
         }
 
 
+        public MetaParameterBuilder ReturnType
+        {
+            get { return _returnParameter; }
+        }
+
         #region Buildings
 
         internal override MetaFunction Build(MetaObjectBuilderContext context)

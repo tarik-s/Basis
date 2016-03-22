@@ -37,7 +37,7 @@ namespace Meticulous.Meta
     {
         private ParameterType _parameterType;
         public MetaParameterBuilder(string name)
-            : base(name)
+            : base(name, MetaType.Integer)
         {
             _parameterType = ParameterType.Input;
         }

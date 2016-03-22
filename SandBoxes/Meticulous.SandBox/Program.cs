@@ -77,17 +77,17 @@ namespace Meticulous.SandBox
                 context.Append(", ");
             }
 
-            context.AppendLine(");");
+            context.AppendLine("): " + metaFunction.ReturnType.Name + ";");
         }
 
         public void VisitParameter(MetaParameter metaParameter, StringBuilder context)
         {
-            context.Append(metaParameter.Name);
+            context.Append(metaParameter.Name + " : " + metaParameter.Type.Name);
         }
 
         public void VisitField(MetaField field, StringBuilder context)
         {
-            context.AppendLine("    -" + field.Name + ";");
+            context.AppendLine("    -" + field.Name + " : " + field.Type.Name + ";");
         }
 
         public void VisitPlainType(PlainMetaType type, StringBuilder context)
@@ -270,7 +270,7 @@ namespace Meticulous.SandBox
 
                         }).AddMethod("Delete", deleteMethod =>
                         {
-                            
+                            deleteMethod.ReturnType.SetType(MetaType.Void);
                         });
                     });
                 })

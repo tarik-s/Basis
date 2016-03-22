@@ -38,15 +38,22 @@ namespace Meticulous.Meta
     {
         private MetaTypeProxy _type;
 
-        protected MetaVariableBuilder(string name)
+        protected MetaVariableBuilder(string name, MetaType initialType)
             : base(name)
         {
-            _type = new MetaTypeProxy();
+            _type = MetaTypeProxy.Create(initialType);
         }
 
         public MetaTypeProxy Type
         {
             get { return _type; }
+        }
+
+        public void SetType(MetaType type)
+        {
+            Check.ArgumentNotNull(type, "type");
+
+            _type = MetaTypeProxy.Create(type);
         }
 
         internal Func<MetaType> CreateMetaTypeFactory(MetaObjectBuilderContext context)
