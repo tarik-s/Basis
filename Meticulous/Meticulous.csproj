@@ -171,12 +171,14 @@
     <Compile Include="Meta\MetaExtensions.cs" />
     <Compile Include="Meta\MetaField.cs" />
     <Compile Include="Meta\MetaFunction.cs" />
+    <Compile Include="Meta\MetaInterface.cs" />
     <Compile Include="Meta\MetaModule.cs" />
     <Compile Include="Meta\MetaObject.cs" />
     <Compile Include="Meta\IMetaTypeVisitor.cs" />
     <Compile Include="Meta\MetaParameter.cs" />
     <Compile Include="Meta\MetaType.cs" />
     <Compile Include="Meta\MetaTypeProxy.cs" />
+    <Compile Include="Meta\MetaTypeVersion.cs" />
     <Compile Include="Meta\MetaVariable.cs" />
     <Compile Include="Patterns\Builder.cs" />
     <Compile Include="Patterns\Composite.cs" />
@@ -186,6 +188,8 @@
     <Compile Include="Threading\ExecutionQueue.cs" />
     <Compile Include="Threading\ExtensionMethods.cs" />
     <Compile Include="Threading\RunLoop.cs" />
+    <Compile Include="Threading\Tasks\AsyncLazy.cs" />
+    <Compile Include="Threading\Tasks\AsyncValue.cs" />
     <Compile Include="TryFunc.cs" />
   </ItemGroup>
   <ItemGroup>

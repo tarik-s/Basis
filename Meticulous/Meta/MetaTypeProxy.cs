@@ -64,7 +64,7 @@ namespace Meticulous.Meta
             public override MetaType Resolve(MetaModule module)
             {
                 var types = module.Types;
-                var resolvedType = types.First(t => t.Name == _name);
+                var resolvedType = types.Single(t => t.Name == _name);
                 return resolvedType;
             }
         }

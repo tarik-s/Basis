@@ -54,6 +54,11 @@ namespace Meticulous.SandBox
             }
         }
 
+        public void VisitInterface(MetaInterface @interface, StringBuilder context)
+        {
+            throw new NotImplementedException();
+        }
+
         public void VisitModule(MetaModule metaModule, StringBuilder context)
         {
             context.AppendLine(metaModule.Name);

@@ -10,6 +10,7 @@ namespace Meticulous.Meta
     {
         void VisitModule(MetaModule module, TContext context);
         void VisitClass(MetaClass @class, TContext context);
+        void VisitInterface(MetaInterface @interface, TContext context);
         void VisitFunction(MetaFunction function, TContext context);
         void VisitParameter(MetaParameter parameter, TContext context);
         void VisitField(MetaField field, TContext context);

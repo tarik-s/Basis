@@ -42,7 +42,12 @@ namespace Meticulous.Meta
         private EncapsulationLevel _encapsulationLevel;
 
         public MetaFieldBuilder(string name)
-            : base(name, MetaType.Integer)
+            : this(name, null)
+        {
+        }
+
+        internal MetaFieldBuilder(string name, MetaObjectBuilder parentBuilder)
+            : base(name, parentBuilder, MetaType.Integer)
         {
             _encapsulationLevel = EncapsulationLevel.Private;
         }

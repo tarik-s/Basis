@@ -6,9 +6,10 @@ using System.Linq;
 
 namespace Meticulous.Meta
 {
-    public class MetaClass : MetaObject
+    public class MetaClass : MetaObject, IMetaClassProxy
     {
         private readonly MetaClass _base;
+        private readonly ImmutableArray<MetaInterface> _interfaces;
 
         private readonly ImmutableArray<MetaClass> _derivedClasses;
         private readonly ImmutableArray<MetaFunction> _methods;
@@ -18,6 +19,7 @@ namespace Meticulous.Meta
             : base(builder, context.Module)
         {
             _base = context.Class;
+            _interfaces = context.BaseInterfaces;
 
             using (context.CreateScope(this))
             {
@@ -31,6 +33,11 @@ namespace Meticulous.Meta
         public MetaClass Base
         {
             get { return _base; }
+        }
+
+        public ImmutableArray<MetaInterface> Interfaces
+        {
+            get { return _interfaces; }
         }
 
         public ImmutableArray<MetaClass> DerivedClasses
@@ -72,13 +79,25 @@ namespace Meticulous.Meta
             ResolveDeferredMembers(_methods, context);
             ResolveDeferredMembers(_derivedClasses, context);
         }
+
+        MetaClass IMetaClassProxy.Resolve(MetaObjectBuilderContext context)
+        {
+            return this;
+        }
     }
 
-    public class MetaClassBuilder : MetaObjectBuilder<MetaClass>
+    internal interface IMetaClassProxy
+    {
+        string Name { get; }
+
+        MetaClass Resolve(MetaObjectBuilderContext context);
+    }
+
+    public class MetaClassBuilder : MetaObjectBuilder<MetaClass>, IMetaClassProxy
     {
         #region Fields
 
-        private readonly BaseHolder _base = BaseHolder.Null;
+        private readonly IMetaClassProxy _base = null;
         private readonly List<MetaClassBuilder> _derivedBuilders;
         private readonly List<MetaFieldBuilder> _fieldBuilders;
         private readonly List<MetaFunctionBuilder> _methodBuilders;
@@ -87,35 +106,33 @@ namespace Meticulous.Meta
 
         #region Constructors
 
-        internal MetaClassBuilder(string name, MetaClass baseClass)
-            : this(name)
+        public MetaClassBuilder(string name, MetaClass baseClass)
+            : this(name, baseClass, null)
         {
             Check.ArgumentNotNull(baseClass, "baseClass");
-
-            _base = new BaseClassProxy(baseClass);
         }
 
         public MetaClassBuilder(string name)
-            : base(name)
+            : this(name, null, null)
         {
+            
+        }
+
+        internal MetaClassBuilder(string name, IMetaClassProxy baseClassProxy, MetaObjectBuilder parentBuilder)
+            : base(name, parentBuilder)
+        {
+            _base = baseClassProxy;
+
             _derivedBuilders = new List<MetaClassBuilder>();
             _fieldBuilders = new List<MetaFieldBuilder>();
             _methodBuilders = new List<MetaFunctionBuilder>();
-        }
-
-        private MetaClassBuilder(string name, MetaClassBuilder baseClassBuilder)
-            : this(name)
-        {
-            Check.ArgumentNotNull(baseClassBuilder, "baseClassBuilder");
-
-            _base = new BaseClassBuilderProxy(baseClassBuilder);
         }
 
         #endregion
 
         public MetaClassBuilder AddDerivedClass(string name)
         {
-            var builder = new MetaClassBuilder(name, this);
+            var builder = new MetaClassBuilder(name, this, this);
 
             _derivedBuilders.Add(builder);
 
@@ -124,7 +141,7 @@ namespace Meticulous.Meta
 
         public MetaFunctionBuilder AddMethod(string name)
         {
-            var methodBuilder = new MetaFunctionBuilder(name);
+            var methodBuilder = new MetaFunctionBuilder(name, this);
 
             _methodBuilders.Add(methodBuilder);
 
@@ -133,7 +150,7 @@ namespace Meticulous.Meta
 
         public MetaFieldBuilder AddField(string name)
         {
-            var fieldBuilder = new MetaFieldBuilder(name);
+            var fieldBuilder = new MetaFieldBuilder(name, this);
 
             _fieldBuilders.Add(fieldBuilder);
 
@@ -159,7 +176,8 @@ namespace Meticulous.Meta
 
         internal override MetaClass Build(MetaObjectBuilderContext context)
         {
-            using (context.CreateScope(_base.Class))
+            var baseClass = _base.Resolve(context);
+            using (context.CreateScope(baseClass))
             {
                 return new MetaClass(this, context);
             }
@@ -167,56 +185,10 @@ namespace Meticulous.Meta
 
         #endregion
 
-        #region BaseHolder
-
-        private class BaseHolder
+        MetaClass IMetaClassProxy.Resolve(MetaObjectBuilderContext context)
         {
-            public static readonly BaseHolder Null = new BaseHolder();
-
-            protected BaseHolder()
-            {
-            }
-
-            public virtual MetaClass Class
-            {
-                get { return null; }
-            }
-
-            public virtual MetaClassBuilder ClassBuilder
-            {
-                get { return null; }
-            }
+            throw new NotImplementedException();
         }
-
-        private sealed class BaseClassProxy : BaseHolder
-        {
-            private readonly MetaClass _class;
-            public BaseClassProxy(MetaClass @class)
-            {
-                _class = @class;
-            }
-
-            public override MetaClass Class
-            {
-                get { return _class; }
-            }
-        }
-
-        private sealed class BaseClassBuilderProxy : BaseHolder
-        {
-            private readonly MetaClassBuilder _builder;
-            public BaseClassBuilderProxy(MetaClassBuilder builder)
-            {
-                _builder = builder;
-            }
-
-            public override MetaClassBuilder ClassBuilder
-            {
-                get { return _builder; }
-            }
-        }
-
-        #endregion
     }
 
 }

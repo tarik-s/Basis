@@ -17,6 +17,7 @@ namespace Meticulous.Meta
             _name = name;
         }
 
+        #region Built-in types
 
         public static VoidMetaType Void
         {
@@ -42,6 +43,8 @@ namespace Meticulous.Meta
         {
             get { return MetaModule.Core.String; }
         }
+
+        #endregion
 
         public string Name
         {
@@ -120,6 +123,4 @@ namespace Meticulous.Meta
         {
         }
     }
-
-
 }

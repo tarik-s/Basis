@@ -36,15 +36,21 @@ namespace Meticulous.Meta
     public sealed class MetaParameterBuilder : MetaVariableBuilder<MetaParameter>
     {
         private ParameterType _parameterType;
-        public MetaParameterBuilder(string name)
-            : base(name, MetaType.Integer)
+
+        internal MetaParameterBuilder(string name, MetaObjectBuilder parentBuilder)
+            : base(name, parentBuilder, MetaType.Integer)
         {
             _parameterType = ParameterType.Input;
         }
 
-        public static MetaParameterBuilder CreateReturnParameterBuilder()
+        public MetaParameterBuilder(string name)
+            : this(name, null)
         {
-            var paramBuilder = new MetaParameterBuilder("return");
+        }
+
+        public static MetaParameterBuilder CreateReturnParameterBuilder(MetaObjectBuilder parentBuilder)
+        {
+            var paramBuilder = new MetaParameterBuilder("return", parentBuilder);
             paramBuilder.ParameterType = ParameterType.Result;
             return paramBuilder;
         }

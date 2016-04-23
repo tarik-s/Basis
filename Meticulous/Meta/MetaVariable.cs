@@ -38,8 +38,8 @@ namespace Meticulous.Meta
     {
         private MetaTypeProxy _type;
 
-        protected MetaVariableBuilder(string name, MetaType initialType)
-            : base(name)
+        protected MetaVariableBuilder(string name, MetaObjectBuilder parentBuilder, MetaType initialType)
+            : base(name, parentBuilder)
         {
             _type = MetaTypeProxy.Create(initialType);
         }

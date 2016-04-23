@@ -34,6 +34,10 @@
       <HintPath>..\..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Collections.Immutable, Version=1.1.36.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Collections.Immutable.1.1.36\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -47,6 +51,8 @@
     <Compile Include="Collections\Generic\TreeNodeTests.cs" />
     <Compile Include="Collections\Immutable\ImmutableTreeNodeTests.cs" />
     <Compile Include="ExceptionHandlerTests.cs" />
+    <Compile Include="Meta\MetaFieldTest.cs" />
+    <Compile Include="Meta\MetaInterfaceTest.cs" />
     <Compile Include="Meta\MetaModuleTests.cs" />
     <Compile Include="Patterns\BuilderTests.cs" />
     <Compile Include="ProgressTests.cs" />

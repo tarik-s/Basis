@@ -5,10 +5,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Configuration;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Meticulous;
 using Meticulous.Meta;
 using Meticulous.Patterns;
+using Meticulous.Threading;
 
 namespace Meticulous.Meta
 { 
@@ -46,12 +48,38 @@ namespace Meticulous.Meta
 
     public abstract class MetaObjectBuilder : IBuilder<MetaObject>
     {
+        private static long s_id = 0;
+        private readonly long _id;
+        private readonly long _rootId = 0;
         private readonly string _name;
 
         protected MetaObjectBuilder(string name)
         {
+            _id = Interlocked.Increment(ref s_id);
             _name = name;
         }
+
+        internal MetaObjectBuilder(string name, MetaObjectBuilder parentBuilder)
+            : this(name)
+        {
+            if (parentBuilder != null)
+            {
+                _rootId = parentBuilder.RootId;
+                if (_rootId == 0)
+                    _rootId = parentBuilder.Id;
+            }
+        }
+
+        internal long Id
+        {
+            get { return _id; }
+        }
+
+        internal long RootId
+        {
+            get { return _rootId; }
+        }
+
 
         public string Name
         {
@@ -64,15 +92,33 @@ namespace Meticulous.Meta
         }
 
         protected abstract MetaObject BuildCore();
+
+        internal void CheckRoot(MetaObjectBuilder builder)
+        {
+            Check.ArgumentNotNull(builder, "builder");
+            if (_rootId == 0)
+                throw new InvalidOperationException("Rootless builder");
+
+            if (builder.RootId == 0)
+                throw new ArgumentException("Rootless builder");
+
+            Check.OperationValid(builder.RootId == _rootId, "Builders belong to different roots");
+        }
     }
 
     public abstract class MetaObjectBuilder<TMetaObject> : MetaObjectBuilder, IBuilder<TMetaObject>
         where TMetaObject : MetaObject
     {
-        protected MetaObjectBuilder(string name)
-            : base(name)
-        {
+        //protected MetaObjectBuilder(string name)
+        //    : base(name)
+        //{
 
+        //}
+
+        internal MetaObjectBuilder(string name, MetaObjectBuilder parentBuilder)
+            : base(name, parentBuilder)
+        {
+            
         }
 
         internal abstract TMetaObject Build(MetaObjectBuilderContext context);
@@ -99,6 +145,9 @@ namespace Meticulous.Meta
 
     internal class MetaObjectBuilderContext : IMetaTypeVisitor<bool>
     {
+        private static long s_id = 0;
+
+        private readonly long _id;
         private readonly MetaObjectBuilder _rootBuilder;
 
         private MetaModule _module;
@@ -107,24 +156,26 @@ namespace Meticulous.Meta
         private MetaParameter _parameter;
         private MetaField _field;
 
+        private readonly Stack<MetaInterface> _interfaces;
+        private readonly Stack<ImmutableArray<MetaInterface>> _baseInterfaces;
+
+        private readonly Dictionary<string, MetaInterface> _registeredInterfaces;
+
 
         public MetaObjectBuilderContext(MetaObjectBuilder rootBuilder)
         {
+            _id = Interlocked.Increment(ref s_id);
+
             _rootBuilder = rootBuilder;
+            _baseInterfaces = new Stack<ImmutableArray<MetaInterface>>();
+            _interfaces = new Stack<MetaInterface>();
+
+            _registeredInterfaces = new Dictionary<string, MetaInterface>();
         }
 
-        public MetaObjectBuilderContext Copy()
+        public long Id
         {
-            var ctx = new MetaObjectBuilderContext(_rootBuilder)
-            {
-                _class = _class,
-                _field = _field,
-                _module = _module,
-                _function = _function,
-                _parameter = _parameter
-            };
-           
-            return ctx;
+            get { return _id; }
         }
 
         public IDisposable CreateScope<TObject>(TObject obj)
@@ -146,6 +197,50 @@ namespace Meticulous.Meta
         public MetaClass Class
         {
             get { return _class; }
+        }
+
+        public ImmutableArray<MetaInterface> BaseInterfaces
+        {
+            get
+            {
+                if (_baseInterfaces.Count == 0)
+                    return ImmutableArray<MetaInterface>.Empty;
+
+                var baseInterfaces = _baseInterfaces.Peek();
+                return baseInterfaces;
+            }
+        }
+
+        public void PushBaseInterfaces(ImmutableArray<IMetaInterfaceProxy> interfaceProxies)
+        {
+            var interfaces = interfaceProxies.Select(ip => ip.Resolve(this)).ToImmutableArray();
+            _baseInterfaces.Push(interfaces);
+        }
+        
+        public void PopBaseInterfaces()
+        {
+            _baseInterfaces.Pop();
+        }
+
+        public MetaInterface Interface
+        {
+            get
+            {
+                if (_interfaces.Count == 0)
+                    return null;
+
+                var result = _interfaces.Peek();
+                return result;
+            }
+        }
+
+        public MetaInterface FindInterface(string name)
+        {
+            MetaInterface result;
+            if (_registeredInterfaces.TryGetValue(name, out result))
+                return result;
+
+            return null;
         }
 
         public MetaFunction Function
@@ -180,6 +275,19 @@ namespace Meticulous.Meta
         {
             Debug.Assert((context && _class == @class.Base) || (!context && _class == @class));
             _class = context ? @class : @class.Base;
+        }
+
+        public void VisitInterface(MetaInterface @interface, bool context)
+        {
+            if (context)
+            {
+                if (@interface.Module == _module)
+                    _registeredInterfaces[@interface.Name] = @interface;
+
+                _interfaces.Push(@interface);
+            }
+            else
+                _interfaces.Pop();
         }
 
         public void VisitFunction(MetaFunction function, bool context)

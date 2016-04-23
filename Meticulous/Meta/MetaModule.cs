@@ -18,6 +18,8 @@ namespace Meticulous.Meta
         private readonly ImmutableArray<MetaClass> _rootClasses = ImmutableArray<MetaClass>.Empty;
         private readonly ImmutableArray<MetaClass> _classes= ImmutableArray<MetaClass>.Empty;
 
+        private readonly ImmutableArray<MetaInterface> _interfaces = ImmutableArray<MetaInterface>.Empty;
+
 
 
         internal MetaModule(MetaModuleBuilder builder, MetaObjectBuilderContext context)
@@ -28,6 +30,9 @@ namespace Meticulous.Meta
             var types = new List<MetaType>();
             using (context.CreateScope(this))
             {
+
+                _interfaces = builder.BuildInterfaces(context);
+
                 // Build classes
                 _rootClasses = builder.BuildClasses(context);
 
@@ -149,13 +154,15 @@ namespace Meticulous.Meta
 
         private readonly List<MetaModule> _references;
         private readonly List<MetaClassBuilder> _classBuilders;
+        private readonly List<MetaInterfaceBuilder> _interfaceBuilders;
 
         #endregion
         
         public MetaModuleBuilder(string name)
-            : base(name)
+            : base(name, null)
         {
             _classBuilders = new List<MetaClassBuilder>();
+            _interfaceBuilders = new List<MetaInterfaceBuilder>();
             _references = new List<MetaModule>();
             _references.Add(MetaModule.Core);
         }
@@ -164,7 +171,7 @@ namespace Meticulous.Meta
 
         public MetaClassBuilder AddClass(string className)
         {
-            var builder = new MetaClassBuilder(className);
+            var builder = new MetaClassBuilder(className, null, this);
 
             _classBuilders.Add(builder);
 
@@ -173,9 +180,22 @@ namespace Meticulous.Meta
 
         public MetaClassBuilder AddClass(string name, MetaClass baseClass)
         {
-            var builder = new MetaClassBuilder(name, baseClass);
+            var builder = new MetaClassBuilder(name, baseClass, this);
 
             _classBuilders.Add(builder);
+
+            return builder;
+        }
+
+        #endregion
+
+        #region Interfaces
+
+        public MetaInterfaceBuilder AddInterface(string interfaceName)
+        {
+            var builder = new MetaInterfaceBuilder(interfaceName, this);
+
+            _interfaceBuilders.Add(builder);
 
             return builder;
         }
@@ -213,6 +233,11 @@ namespace Meticulous.Meta
         internal ImmutableArray<MetaClass> BuildClasses(MetaObjectBuilderContext context)
         {
             return BuildSubObjects(_classBuilders, context);
+        }
+
+        internal ImmutableArray<MetaInterface> BuildInterfaces(MetaObjectBuilderContext context)
+        {
+            return BuildSubObjects(_interfaceBuilders, context);
         }
 
         #endregion

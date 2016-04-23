@@ -51,12 +51,16 @@ namespace Meticulous.Meta
         private readonly List<MetaParameterBuilder> _parameters;
 
         public MetaFunctionBuilder(string name)
-            : base(name)
+            : base(name, null)
         {
-            _returnParameter = MetaParameterBuilder.CreateReturnParameterBuilder();
-            _parameters = new List<MetaParameterBuilder>();
         }
 
+        internal MetaFunctionBuilder(string name, MetaObjectBuilder parentBuilder)
+            : base(name, parentBuilder)
+        {
+            _returnParameter = MetaParameterBuilder.CreateReturnParameterBuilder(this);
+            _parameters = new List<MetaParameterBuilder>();
+        }
 
         public MetaParameterBuilder ReturnType
         {
