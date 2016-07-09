@@ -140,5 +140,18 @@ namespace Meticulous
 
         #endregion
 
+        public static bool IsBaseOrTypeOf(this Type @this, Type baseType)
+        {
+            Check.This(@this);
+
+            if (@this == baseType)
+                return true;
+
+            if (@this.IsSubclassOf(baseType))
+                return true;
+
+            return false;
+        }
+
     }
 }

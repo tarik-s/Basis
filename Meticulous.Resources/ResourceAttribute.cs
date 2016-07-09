@@ -12,7 +12,7 @@ namespace Meticulous.Resources
     /// Resource attribute
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Enum)]
-    public sealed class ResourceAttribute : ExternalMemberAttribute
+    public sealed class ResourceAttribute : ExternalAttribute
     {
         private bool? _localizable;
 
@@ -57,14 +57,14 @@ namespace Meticulous.Resources
             get { return _localizable; }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="memberInfo"></param>
-        /// <returns></returns>
-        protected override ExternalMemberInfo CreateInfoImpl(MemberInfo memberInfo)
-        {
-            throw new NotImplementedException();
-        }
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="memberInfo"></param>
+        ///// <returns></returns>
+        //protected override ExternalMemberInfo CreateInfoImpl(MemberInfo memberInfo)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }

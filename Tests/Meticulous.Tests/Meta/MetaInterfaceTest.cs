@@ -29,23 +29,6 @@ namespace Meticulous.Tests.Meta
 
             Assert.AreEqual(intf.Methods[0].ReturnType, MetaType.String);
             Assert.AreEqual(intf.Methods[0].Name, "TestMethod");
-
-            var b1 = new MetaInterfaceBuilder("ITest2");
-            b1.AddBaseInterface(intf);
-
-            var b2 = new MetaInterfaceBuilder("IBaseTest");
-            b1.AddBaseInterface(b2);
-
-            var mb1 = b1.AddMethod("TestMethod2");
-            var rtb1 = mb1.ReturnType;
-
-            rtb1.SetType(MetaType.Float);
-
-            var intf1 = b1.Build();
-
-            Assert.AreEqual(intf1.BaseInterfaces.Length, 2);
-            Assert.AreEqual(intf1.BaseInterfaces[0], intf);
-
         }
 
     }

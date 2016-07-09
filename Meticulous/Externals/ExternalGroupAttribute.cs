@@ -9,7 +9,7 @@ namespace Meticulous.Externals
     /// <summary>
     /// 
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Assembly, Inherited = false)]
     public class ExternalGroupAttribute : Attribute
     {
         private readonly string _name;
@@ -31,9 +31,9 @@ namespace Meticulous.Externals
             get { return _name; }
         }
 
-        protected internal virtual ExternalGroupInfoBuilder CreateGroupInfoBuilder(Type classType)
-        {
-            return new ExternalGroupInfoBuilder(_name);
-        }
+        //protected internal virtual ExternalGroupInfoBuilder CreateGroupInfoBuilder(Type classType)
+        //{
+        //    return new ExternalGroupInfoBuilder(_name);
+        //}
     }
 }

@@ -7,59 +7,49 @@ using System.Threading.Tasks;
 
 namespace Meticulous.Externals
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public abstract class ExternalDriver
     {
         public bool Supports(ExternalGroupAttribute groupAttribute)
         {
-            Check.ArgumentNotNull(groupAttribute, "groupAttribute");
-
             return SupportsImpl(groupAttribute);
         }
 
-        public bool Supports(ExternalMemberAttribute memberAttribute)
+        public bool Supports(Type type, Uri uri)
         {
-            Check.ArgumentNotNull(memberAttribute, "memberAttribute");
-
-            return SupportsImpl(memberAttribute);
+            return SupportsImpl(type, uri);
         }
 
-        public ExternalGroupInfoBuilder CreateGroupInfoBuilder(Type classType, ExternalGroupAttribute groupAttribute)
+        internal void AddStaticValue(IExternal value)
         {
-            Check.ArgumentNotNull(classType, "classType");
-            Check.ArgumentNotNull(groupAttribute, "groupAttribute");
-
-            return CreateGroupInfoBuilderImpl(classType, groupAttribute);
+            HandleNewValue(value);
         }
 
-        public ExternalMemberInfo CreateMemberInfo(MemberInfo memberInfo, ExternalMemberAttribute memberAttribute)
+        internal void AddDynamicValue(IExternal value)
         {
-            Check.ArgumentNotNull(memberInfo, "memberInfo");
-            Check.ArgumentNotNull(memberAttribute, "memberAttribute");
-
-            return CreateMemberInfoImpl(memberInfo, memberAttribute);
+            HandleNewValue(value);
         }
 
-        protected abstract bool SupportsImpl(ExternalMemberAttribute memberAttribute);
-
-        protected virtual ExternalMemberInfo CreateMemberInfoImpl(MemberInfo memberInfo, ExternalMemberAttribute memberAttribute)
+        public ExternalSettings CreateSettings(string rawSettings)
         {
-            return memberAttribute.CreateInfo(memberInfo);
+            return CreateSettingsImpl(rawSettings);
         }
 
-        protected virtual ExternalGroupInfoBuilder CreateGroupInfoBuilderImpl(Type classType, ExternalGroupAttribute groupAttribute)
+        protected abstract void HandleNewValue(IExternal value);
+
+        protected virtual ExternalSettings CreateSettingsImpl(string rawSettings)
         {
-            return groupAttribute.CreateGroupInfoBuilder(classType);
+            return new ExternalSettings(rawSettings);
         }
+
+        protected abstract bool SupportsImpl(Type type, Uri uri);
 
         protected virtual bool SupportsImpl(ExternalGroupAttribute groupAttribute)
         {
-            if (groupAttribute.GetType().IsSubclassOf(typeof(ExternalGroupAttribute)))
-                return false;
+            var attrType = groupAttribute.GetType();
+            if (attrType.IsBaseOrTypeOf(typeof (ExternalGroupAttribute)))
+                return true;
 
-            return true;
+            return false;
         }
     }
 }

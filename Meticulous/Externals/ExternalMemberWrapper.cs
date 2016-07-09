@@ -7,20 +7,23 @@ using System.Threading.Tasks;
 
 namespace Meticulous.Externals
 {
-    internal sealed class ExternalMemberWrapper : IExternalizable
+    internal sealed class ExternalMemberWrapper : IExternal
     {
         private readonly object _defaultValue;
-        private readonly MemberWrapper _wrapperCore;
+        private readonly MemberWrapper _wrapper;
 
-        private ExternalMemberWrapper(MemberWrapper wrapperCore)
+        private Uri _path;
+        private ExternalSettings _settings;
+
+        public ExternalMemberWrapper(MemberWrapper wrapper)
         {
-            _wrapperCore = wrapperCore;
-            _defaultValue = _wrapperCore.GetValue();
+            _wrapper = wrapper;
+            _defaultValue = _wrapper.GetValue();
         }
 
-        public static ExternalMemberWrapper Create(MemberInfo memberInfo, object owner)
+        public static ExternalMemberWrapper Create(MemberInfo memberInfo)
         {
-            var wrapperCore = MemberWrapper.Create(memberInfo, owner);
+            var wrapperCore = MemberWrapper.Create(memberInfo, null);
             return new ExternalMemberWrapper(wrapperCore);
         }
 
@@ -31,30 +34,59 @@ namespace Meticulous.Externals
 
         public object Value
         {
-            get { return _wrapperCore.GetValue(); }
+            get { return _wrapper.GetValue(); }
+            set { _wrapper.SetValue(value); }
         }
 
-        private abstract class MemberWrapper
+        public Type UnderlyingType
         {
-            public static MemberWrapper Create(MemberInfo memberInfo, object owner)
-            {
-                Check.ArgumentNotNull(memberInfo, "memberInfo");
-
-                var fieldInfo = memberInfo as FieldInfo;
-                if (fieldInfo != null)
-                    return new FieldWrapper(fieldInfo, owner);
-
-                var propertyInfo = memberInfo as PropertyInfo;
-                if (propertyInfo != null)
-                    return new PropertyWrapper(propertyInfo, owner);
-
-                throw new ArgumentException("Invalid mememer info", "memberInfo");
-            }
-
-            public abstract object GetValue();
-
-            public abstract void SetValue(object value);
+            get { return _wrapper.Type; }
         }
+
+        public Uri Path
+        {
+            get { return _path; }
+        }
+
+        public ExternalSettings Settings
+        {
+            get { return _settings; }
+        }
+
+        public bool Setup(Uri path, ExternalSettings settings)
+        {
+            _path = path;
+            _settings = settings;
+            return true;
+        }
+    }
+
+    public abstract class MemberWrapper
+    {
+        public static MemberWrapper Create(MemberInfo memberInfo, object owner)
+        {
+            Check.ArgumentNotNull(memberInfo, "memberInfo");
+
+            var fieldInfo = memberInfo as FieldInfo;
+            if (fieldInfo != null)
+                return new FieldWrapper(fieldInfo, owner);
+
+            var propertyInfo = memberInfo as PropertyInfo;
+            if (propertyInfo != null)
+                return new PropertyWrapper(propertyInfo, owner);
+
+            throw new ArgumentException("Invalid mememer info", "memberInfo");
+        }
+
+        public abstract object GetValue();
+
+        public abstract void SetValue(object value);
+
+        public abstract Type Type { get; }
+
+        public abstract bool IsStatic { get; }
+
+        #region Implementations
 
         private sealed class FieldWrapper : MemberWrapper
         {
@@ -75,6 +107,16 @@ namespace Meticulous.Externals
             public override void SetValue(object value)
             {
                 _fieldInfo.SetValue(_owner, value);
+            }
+
+            public override Type Type
+            {
+                get { return _fieldInfo.FieldType; }
+            }
+
+            public override bool IsStatic
+            {
+                get { return _fieldInfo.IsStatic; }
             }
         }
 
@@ -98,6 +140,29 @@ namespace Meticulous.Externals
             {
                 _propertyInfo.SetValue(_owner, value);
             }
+
+            public override Type Type
+            {
+                get { return _propertyInfo.PropertyType; }
+            }
+
+            public override bool IsStatic
+            {
+                get
+                {
+                    var getMethod = _propertyInfo.GetMethod;
+                    if (getMethod != null)
+                        return getMethod.IsStatic;
+
+                    var setMethod = _propertyInfo.SetMethod;
+                    Check.OperationValid(setMethod != null, "Property doesn't have getter or setter");
+                    return setMethod.IsStatic;
+                }
+            }
         }
+
+        #endregion
     }
+
+
 }

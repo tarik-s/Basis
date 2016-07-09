@@ -7,8 +7,27 @@ using System.Threading.Tasks;
 
 namespace Meticulous.Externals
 {
+    public static class External
+    {
+        public static External<T> Create<T>(T value, Uri uri, ExternalSettings settings)
+        {
+            return new External<T>(value);
+        }
+    }
+
     internal static class ExternalHelper
     {
-        
+        public static Type GetMemberType(MemberInfo memberInfo)
+        {
+            var pi = memberInfo as PropertyInfo;
+            if (pi != null)
+                return pi.PropertyType;
+
+            var fi = memberInfo as FieldInfo;
+            if (fi != null)
+                return fi.FieldType;
+
+            throw new ArgumentException("Invalid paramerter", "memberInfo");
+        }
     }
 }

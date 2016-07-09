@@ -15,10 +15,13 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
 using Meticulous.Collections.Generic;
+using Meticulous.Externals;
 using Meticulous.Threading;
 using Meticulous.IO;
 using Meticulous.Meta;
 using NLog;
+
+[assembly: ExternalGroup("Asm")]
 
 namespace Meticulous.SandBox
 {
@@ -101,15 +104,32 @@ namespace Meticulous.SandBox
         }
     }
 
-    public static class Exts
+
+    internal class DummyDriver : ExternalDriver
     {
-        public static void TestTest(this string @this)
+        protected override void HandleNewValue(IExternal value)
         {
+            //value.Value = 
+        }
+
+        protected override bool SupportsImpl(Type type, Uri uri)
+        {
+            if (uri.Scheme == "dummy")
+                return true;
+
+            return false;
         }
     }
 
+    
+
+    [ExternalGroup("Program")]
     internal class Program
     {
+        [External("dummy://test")]
+        private static string s_remoteName = "test";
+
+        [External("dummy://testText")] private static External<string> s_remoteText;// = "test";
 
         private static Logger s_logger = LogManager.GetCurrentClassLogger();
 
@@ -221,6 +241,10 @@ namespace Meticulous.SandBox
 
         private static int Main(string[] args)
         {
+            //var uri = new Uri("res://[path]/test", UriKind.RelativeOrAbsolute);
+            var mgr = ExternalManager.Instance;
+            mgr.Setup(ImmutableArray.Create(new DummyDriver()));
+
 
 
             //s_logger.Info("hello world");
@@ -246,6 +270,8 @@ namespace Meticulous.SandBox
             //Console.ReadKey();
             ////return 0;
 
+
+            //Assembly.GetAssembly();
 
             var baseModuleBuilder = new MetaModuleBuilder("BaseModule");
 
