@@ -144,6 +144,18 @@ namespace Meticulous
             Contract.EndContractBlock();
         }
 
+        [DebuggerStepThrough]
+        [ContractArgumentValidator]
+        public static void ArgumentInRange<T>(T param, string paramName, Predicate<T> isInRangeFunc, string message = null)
+        {
+            ArgumentNotNull(isInRangeFunc, "isInRangeFunc");
+
+            if (!isInRangeFunc(param))
+                throw new ArgumentOutOfRangeException(paramName, (object)param, message);
+
+            Contract.EndContractBlock();
+        }
+
         #endregion
 
         /// <summary>

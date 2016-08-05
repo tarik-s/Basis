@@ -153,13 +153,13 @@
     <Compile Include="Collections\Immutable\ImmutableTreeNode.cs" />
     <Compile Include="Collections\Generic\TreeNode.cs" />
     <Compile Include="EmptyArray.cs" />
+    <Compile Include="EventArgs.cs" />
     <Compile Include="ExceptionHandler.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Externals\External.cs" />
     <Compile Include="Externals\ExternalAttribute.cs" />
     <Compile Include="Externals\ExternalDriver.cs" />
     <Compile Include="Externals\ExternalGroupAttribute.cs" />
-    <Compile Include="Externals\ExternalGroupInfo.cs" />
     <Compile Include="Externals\ExternalManager.cs" />
     <Compile Include="Externals\ExternalSettings.cs" />
     <Compile Include="Externals\ExternalMemberWrapper.cs" />
@@ -185,6 +185,7 @@
     <Compile Include="Progress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\AssemblyVisitor.cs" />
+    <Compile Include="Threading\AsyncExecutionQueue.cs" />
     <Compile Include="Threading\Atomic.cs" />
     <Compile Include="Threading\ExecutionQueue.cs" />
     <Compile Include="Threading\ExtensionMethods.cs" />

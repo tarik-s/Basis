@@ -107,9 +107,9 @@ namespace Meticulous.SandBox
 
     internal class DummyDriver : ExternalDriver
     {
-        protected override void HandleNewValue(IExternal value)
+        protected override void ReadValue(IExternal value)
         {
-            //value.Value = 
+            value.Value = "patched value";
         }
 
         protected override bool SupportsImpl(Type type, Uri uri)
@@ -241,10 +241,12 @@ namespace Meticulous.SandBox
 
         private static int Main(string[] args)
         {
-            //var uri = new Uri("res://[path]/test", UriKind.RelativeOrAbsolute);
+            var uri = new Uri("res://path/test?hello=123&w=23|{readonly}");
             var mgr = ExternalManager.Instance;
             mgr.Setup(ImmutableArray.Create(new DummyDriver()));
 
+            Console.WriteLine(s_remoteName);
+            Console.WriteLine(s_remoteText);
 
 
             //s_logger.Info("hello world");

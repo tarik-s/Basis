@@ -11,7 +11,7 @@ namespace Meticulous.Externals
     /// Represents External class
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class External<T> : IExternal
+    public class External<T> : IExternalCore
     {
         private readonly T _defaultValue;
 
@@ -31,9 +31,10 @@ namespace Meticulous.Externals
             _defaultValue = defaultValue;
             _value = defaultValue;
             _provider = new AtomicReferenceValue<TryFunc<T>>(null);
+            _settings = ExternalSettings.Empty;
         }
 
-        public External(T defaultValue, Uri path, ExternalSettings settings)
+        internal External(T defaultValue, Uri path, ExternalSettings settings)
             : this(defaultValue)
         {
             _path = path;
@@ -41,6 +42,8 @@ namespace Meticulous.Externals
 
             ExternalManager.Instance.AttachDynamicValue(this);
         }
+
+        public event EventHandler<EventArgs> Changed;
 
         public Uri Path
         {
@@ -71,7 +74,14 @@ namespace Meticulous.Externals
             {
                 _provider.Exchange(null);
                 _value.Exchange(value);
+
+                EventArgs.Empty.Raise(this, ref Changed);
             }
+        }
+
+        public ExternalPermission Permission
+        {
+            get { return _settings.Permissions; }
         }
 
         public bool TryGetValue(out T value)
@@ -140,7 +150,7 @@ namespace Meticulous.Externals
             get { return typeof(T); }
         }
 
-        bool IExternal.Setup(Uri path, ExternalSettings settings)
+        bool IExternalCore.Setup(Uri path, ExternalSettings settings)
         {
             _path = path;
             _settings = settings;

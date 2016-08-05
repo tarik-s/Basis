@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Meticulous.Externals
 {
-    internal sealed class ExternalMemberWrapper : IExternal
+    internal sealed class ExternalMemberWrapper : IExternalCore
     {
         private readonly object _defaultValue;
         private readonly MemberWrapper _wrapper;
@@ -19,6 +19,7 @@ namespace Meticulous.Externals
         {
             _wrapper = wrapper;
             _defaultValue = _wrapper.GetValue();
+            _settings = ExternalSettings.Empty;
         }
 
         public static ExternalMemberWrapper Create(MemberInfo memberInfo)

@@ -20,7 +20,15 @@ namespace Meticulous.Externals
         Uri Path { get; }
 
         ExternalSettings Settings { get; }
+    }
 
+    internal interface IExternalCore : IExternal
+    {
         bool Setup(Uri path, ExternalSettings settings);
     }
+
+    //internal interface IExternalValueProvider
+    //{
+
+    //}
 }

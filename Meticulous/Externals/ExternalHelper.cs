@@ -9,9 +9,9 @@ namespace Meticulous.Externals
 {
     public static class External
     {
-        public static External<T> Create<T>(T value, Uri uri, ExternalSettings settings)
+        public static External<T> Create<T>(T value, Uri path, ExternalSettings settings)
         {
-            return new External<T>(value);
+            return new External<T>(value, path, settings);
         }
     }
 

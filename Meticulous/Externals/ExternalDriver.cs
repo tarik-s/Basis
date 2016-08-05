@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -9,6 +10,15 @@ namespace Meticulous.Externals
 {
     public abstract class ExternalDriver
     {
+        private readonly ConcurrentDictionary<string, IExternal> _staticVariables;
+        private readonly ConcurrentDictionary<string, WeakReference<IExternal>> _dynamicVariables;
+
+        protected ExternalDriver()
+        {
+            _staticVariables = new ConcurrentDictionary<string, IExternal>();
+            _dynamicVariables = new ConcurrentDictionary<string, WeakReference<IExternal>>();
+        }
+
         public bool Supports(ExternalGroupAttribute groupAttribute)
         {
             return SupportsImpl(groupAttribute);
@@ -19,14 +29,14 @@ namespace Meticulous.Externals
             return SupportsImpl(type, uri);
         }
 
-        internal void AddStaticValue(IExternal value)
+        internal void ReadStaticValue(IExternal value)
         {
-            HandleNewValue(value);
+            ReadValue(value);
         }
 
-        internal void AddDynamicValue(IExternal value)
+        internal void ReadDynamicValue(IExternal value)
         {
-            HandleNewValue(value);
+            ReadValue(value);
         }
 
         public ExternalSettings CreateSettings(string rawSettings)
@@ -34,7 +44,7 @@ namespace Meticulous.Externals
             return CreateSettingsImpl(rawSettings);
         }
 
-        protected abstract void HandleNewValue(IExternal value);
+        protected abstract void ReadValue(IExternal value);
 
         protected virtual ExternalSettings CreateSettingsImpl(string rawSettings)
         {

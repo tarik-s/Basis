@@ -6,9 +6,6 @@ using System.Threading.Tasks;
 
 namespace Meticulous.Externals
 {
-    /// <summary>
-    /// 
-    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Assembly, Inherited = false)]
     public class ExternalGroupAttribute : Attribute
     {
@@ -30,10 +27,5 @@ namespace Meticulous.Externals
         {
             get { return _name; }
         }
-
-        //protected internal virtual ExternalGroupInfoBuilder CreateGroupInfoBuilder(Type classType)
-        //{
-        //    return new ExternalGroupInfoBuilder(_name);
-        //}
     }
 }

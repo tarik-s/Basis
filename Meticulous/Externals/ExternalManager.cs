@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -15,11 +17,10 @@ namespace Meticulous.Externals
     public class ExternalManager
     {
         private static readonly ExternalManager s_manager = new ExternalManager();
-
         private ImmutableArray<ExternalDriver> _drivers;
         private readonly ExceptionHandler _exceptionHandler = ExceptionHandler.AlwaysHandling;
 
-        //private readonly Dictionary<IExternal> 
+
 
 
         private ExternalManager()
@@ -57,7 +58,7 @@ namespace Meticulous.Externals
             var driver = _drivers.FirstOrDefault(d => d.Supports(typeof (T), value.Path));
             if (driver != null)
             {
-                driver.AddDynamicValue(value);
+                driver.ReadDynamicValue(value);
             }
         }
 
@@ -122,7 +123,7 @@ namespace Meticulous.Externals
 
         private void HandleMember_Unsafe(MemberInfo member, ImmutableList<ExternalGroupAttribute> groupStack)
         {
-            IExternal external = null;
+            IExternalCore external = null;
             var attr = member.GetCustomAttribute<ExternalAttribute>();
             var mw = MemberWrapper.Create(member, null);
             var memeberType = mw.Type;
@@ -135,10 +136,10 @@ namespace Meticulous.Externals
                 if (!mw.IsStatic)
                     return;
 
-                external = (IExternal)mw.GetValue();
+                external = (IExternalCore)mw.GetValue();
                 if (external == null)
                 {
-                    external = (IExternal)Activator.CreateInstance(memeberType);
+                    external = (IExternalCore)Activator.CreateInstance(memeberType, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance, null, EmptyArray<object>.Value, CultureInfo.CurrentCulture);
                     mw.SetValue((object)external);
                 }
             }
@@ -148,10 +149,10 @@ namespace Meticulous.Externals
             }
 
             if (external != null)
-                HandleMember(external, attr);
+                HandleMember(external, attr, groupStack);
         }
 
-        private void HandleMember(IExternal external, ExternalAttribute attr)
+        private void HandleMember(IExternalCore external, ExternalAttribute attr, ImmutableList<ExternalGroupAttribute> groupStack)
         {
             var type = external.UnderlyingType;
             var uri = new Uri(attr.Path);
@@ -160,7 +161,7 @@ namespace Meticulous.Externals
             {
                 var settings = driver.CreateSettings(attr.RawSettings);
                 external.Setup(uri, settings);
-                driver.AddStaticValue(external);
+                driver.ReadStaticValue(external);
             }
         }
 
