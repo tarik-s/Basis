@@ -85,7 +85,7 @@ namespace Meticulous.Threading
     {
         #region Fields
 
-        private static readonly Func<T, T, bool> s_equalizer;
+        private static readonly Func<T, T, bool> s_comparer;
 
         private SpinLock _lock;
         private readonly Func<T, T, bool> _equalizer;
@@ -98,7 +98,7 @@ namespace Meticulous.Threading
         static Atomic()
         {
             var comparer = EqualityComparer<T>.Default;
-            s_equalizer = (a, b) => comparer.Equals(a, b);
+            s_comparer = (a, b) => comparer.Equals(a, b);
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace Meticulous.Threading
         /// </summary>
         /// <param name="value">The initial value.</param>
         public Atomic(T value)
-            : this(value, s_equalizer)
+            : this(value, s_comparer)
         {
 
         }
