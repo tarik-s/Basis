@@ -3,37 +3,30 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meticulous", "Meticulous\Meticulous.csproj", "{E0C3C44C-32CE-4701-9B57-FF3FFEAAC9E7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Basis", "Meticulous\Basis.csproj", "{E0C3C44C-32CE-4701-9B57-FF3FFEAAC9E7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meticulous.Tests", "Tests\Meticulous.Tests\Meticulous.Tests.csproj", "{AD3D0E33-D08D-4842-8A18-B7EA75F21E67}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Basis.Tests", "Tests\Meticulous.Tests\Basis.Tests.csproj", "{AD3D0E33-D08D-4842-8A18-B7EA75F21E67}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0EFC0E97-1A38-45A7-8C3B-D6C78B589980}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SandBoxes", "SandBoxes", "{13464BE6-18A5-482C-8F1F-493407E4E2EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meticulous.SandBox", "SandBoxes\Meticulous.SandBox\Meticulous.SandBox.csproj", "{EF0952CF-BC4B-4BAA-BD8C-56212122484B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Basis.SandBox", "SandBoxes\Meticulous.SandBox\Basis.SandBox.csproj", "{EF0952CF-BC4B-4BAA-BD8C-56212122484B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug_CodeContracts|Any CPU = Debug_CodeContracts|Any CPU
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E0C3C44C-32CE-4701-9B57-FF3FFEAAC9E7}.Debug_CodeContracts|Any CPU.ActiveCfg = Debug_CodeContracts|Any CPU
-		{E0C3C44C-32CE-4701-9B57-FF3FFEAAC9E7}.Debug_CodeContracts|Any CPU.Build.0 = Debug_CodeContracts|Any CPU
 		{E0C3C44C-32CE-4701-9B57-FF3FFEAAC9E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E0C3C44C-32CE-4701-9B57-FF3FFEAAC9E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E0C3C44C-32CE-4701-9B57-FF3FFEAAC9E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E0C3C44C-32CE-4701-9B57-FF3FFEAAC9E7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AD3D0E33-D08D-4842-8A18-B7EA75F21E67}.Debug_CodeContracts|Any CPU.ActiveCfg = Debug|Any CPU
-		{AD3D0E33-D08D-4842-8A18-B7EA75F21E67}.Debug_CodeContracts|Any CPU.Build.0 = Debug|Any CPU
 		{AD3D0E33-D08D-4842-8A18-B7EA75F21E67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AD3D0E33-D08D-4842-8A18-B7EA75F21E67}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD3D0E33-D08D-4842-8A18-B7EA75F21E67}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD3D0E33-D08D-4842-8A18-B7EA75F21E67}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EF0952CF-BC4B-4BAA-BD8C-56212122484B}.Debug_CodeContracts|Any CPU.ActiveCfg = Debug|Any CPU
-		{EF0952CF-BC4B-4BAA-BD8C-56212122484B}.Debug_CodeContracts|Any CPU.Build.0 = Debug|Any CPU
 		{EF0952CF-BC4B-4BAA-BD8C-56212122484B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EF0952CF-BC4B-4BAA-BD8C-56212122484B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF0952CF-BC4B-4BAA-BD8C-56212122484B}.Release|Any CPU.ActiveCfg = Release|Any CPU

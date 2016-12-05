@@ -114,9 +114,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Meticulous\Meticulous.csproj">
+    <ProjectReference Include="..\..\Meticulous\Basis.csproj">
       <Project>{e0c3c44c-32ce-4701-9b57-ff3ffeaac9e7}</Project>
-      <Name>Meticulous</Name>
+      <Name>Basis</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
